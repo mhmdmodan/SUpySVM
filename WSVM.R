@@ -57,4 +57,70 @@ ggplot(testWRCHPts, aes(x=x, y=y)) + geom_point()
 pts <- lapply(1:nrow(testWRCHPts), function(n) as.double(c(testWRCHPts[n,1],testWRCHPts[n,2])))
 weights <- sapply(pts, function(n) {1})
 
-findVertex(pts, weights, c(1,0), 1)
+findVertex(pts, weights, c(0,1), 1)
+
+####################
+genRand <- function() {c(runif(1,-1,1),runif(1,-1,1))}
+
+
+WSK <- function(P, s, y) {
+  rchFactor <- 1
+  ep <- 0.0000001
+  classPos <- which(y > 0)
+  classNeg <- which(y < 0)
+  
+  pos <- P[classPos]
+  neg <- P[classNeg]
+  
+  sPos <- s[classPos]
+  sNeg <- s[classNeg]
+  
+  pPos <- findVertex(pos, sPos, genRand(), rchFactor)
+  pNeg <- findVertex(neg, sNeg, genRand(), rchFactor)
+  
+  while(TRUE) {
+    w <- pPos - pNeg
+    
+    vPos <- findVertex(pos, sPos, -w, rchFactor)
+    vNeg <- findVertex(neg, sNeg, w, rchFactor)
+    
+    if(w %.% (pPos - vPos) > w %.% (vNeg - pNeg)) {
+      if(1 - dot(w, (pPos - vNeg))/dot(w,w) < ep) {
+        break
+      }
+      
+      q <- ((pNeg - pPos) %.% (pPos - vPos))/(pPos - vPos)^2
+      pPos <- (1-q)*pPos + q*vPos
+      print('pos')
+    } else {
+      
+      if(1 - dot(w, (vPos - pNeg))/dot(w,w) < ep) {
+        break
+      }
+      
+      q <- ((pPos - pNeg) %.% (pNeg - vNeg))/(pNeg - vNeg)^2
+      pNeg <- (1-q)*pNeg + q*vNeg
+      print('neg')
+    }
+  }
+  
+  b <- .5*(w%.%pPos + w%.%pNeg)
+  return(list(pPos,pNeg,w,b))
+}
+
+
+
+set.seed(123)
+pts <- tibble(x = sample(1:100, size=50, replace=TRUE), y = sample(1:100, size=50, replace=TRUE), class = 1)
+
+for(i in 1:nrow(pts)) {
+  if(pts[i,1] < 37.5) {pts[i,3] <- -1}
+}
+
+ggplot(pts,aes(x=x, y=y, color = class)) + geom_point()
+
+ptsList <- lapply(1:nrow(pts), function(n) as.double(c(pts[n,1],pts[n,2])))
+yList <- pts[,3]
+weights <- sapply(ptsList, function(n) {1})
+
+WSK(ptsList,weights,yList)
