@@ -25,6 +25,7 @@ getMaxIndex <- function(n, P) {
   return(maxInd)
 }
 
+#Finding WRCH vertex
 findVertex <- function(P, s, n, u) {
   if(!checkSameDim(n,P)) {stop('P and n are not same dims')}
   if(length(P) != length(s)) {stop('P and s are not same length')}
@@ -37,5 +38,23 @@ findVertex <- function(P, s, n, u) {
     total <- total + a[i]
   }
   
-  return(sum(a*P))
+  vSum <- 0
+  for(i in 1:length(P)) {
+    vSum <- vSum + a[i]*P[[i]]
+  }
+  
+  return(vSum)
 }
+
+##################
+# Test this shit #
+##################
+testList <- list(c(3,4,5),c(2,3,5),c(6,7,4))
+set.seed(1234)
+testWRCHPts <- tibble(x = sample(1:50, size=10, replace=TRUE), y = sample(1:50, size=10, replace=TRUE))
+ggplot(testWRCHPts, aes(x=x, y=y)) + geom_point()
+
+pts <- lapply(1:nrow(testWRCHPts), function(n) as.double(c(testWRCHPts[n,1],testWRCHPts[n,2])))
+weights <- sapply(pts, function(n) {1})
+
+findVertex(pts, weights, c(1,0), 1)
