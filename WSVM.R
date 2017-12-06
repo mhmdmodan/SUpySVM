@@ -120,7 +120,7 @@ for(i in 1:nrow(pts)) {
 ggplot(pts,aes(x=x, y=y, color = class)) + geom_point()
 
 ptsList <- lapply(1:nrow(pts), function(n) as.double(c(pts[n,1],pts[n,2])))
-yList <- pts[,3]
+yList <- pts$class
 weights <- sapply(ptsList, function(n) {1})
 
 WSK(ptsList,weights,yList)
