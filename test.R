@@ -49,14 +49,17 @@ findVertex <- function(P, s, n, u) {
 genRand <- function() {c(runif(1,-1,1),runif(1,-1,1))}
 
 #####################
-set.seed(1234)
+set.seed(1345)
 pts <- tibble(x = sample(1:100, size=50, replace=TRUE), y = sample(1:100, size=50, replace=TRUE), class = 1)
 
+theorLine <- function(x) {-25/12.5*(x-50)+37.5}
+
 for(i in 1:nrow(pts)) {
-  if(pts[i,1] < 37.5) {pts[i,3] <- -1}
+  if(pts$y[i] < theorLine(pts$x[i])) {pts[i,3] <- -1}
 }
 
-ggplot(pts,aes(x=x, y=y, color = class)) + geom_point()
+ggplot(pts,aes(x=x, y=y, color = class)) + geom_point() + 
+  stat_function(fun=theorLine) + xlim(0,100) + ylim(0,100)
 
 ptsList <- lapply(1:nrow(pts), function(n) as.double(c(pts[n,1],pts[n,2])))
 yList <- pts$class
@@ -64,7 +67,7 @@ weights <- sapply(ptsList, function(n) {1})
 ###########
 
 rchFactor <- 1
-ep <- 0.0000001
+ep <- 10^-5
 
 classPos <- which(yList > 0)
 classNeg <- which(yList < 0)
@@ -74,7 +77,7 @@ neg <- ptsList[classNeg]
 sPos <- weights[classPos]
 sNeg <- weights[classNeg]
 
-set.seed(12345)
+set.seed(1234)
 randVec1 <- genRand()
 randVec2 <- genRand()
 pPos <- findVertex(pos, sPos, randVec1, rchFactor)
@@ -90,7 +93,7 @@ while(TRUE) {
   
   vPos <- findVertex(pos, sPos, -w, rchFactor)
   vNeg <- findVertex(neg, sNeg, w, rchFactor)
-  
+
   if((1 - dot(w, (pPos - vNeg))/dot(w,w)) < ep & (1 - dot(w, (vPos - pNeg))/dot(w,w)) < ep) {
     break
   }
@@ -114,6 +117,11 @@ while(TRUE) {
   }
 }
 w
-ggplot(pts,aes(x=x, y=y, color = class)) + geom_point() + geom_segment(aes(x=pNeg[1],y=pNeg[2],xend=pPos[1],yend=pPos[2]))
 
+bisect = pNeg+w/2
+slope = -1/((pPos[2]-pNeg[2])/(pPos[1]-pNeg[1]))
+line <- function(x) {slope*(x - bisect[1]) + bisect[2]}
+ggplot(pts,aes(x=x, y=y, color = class)) + geom_point() + geom_segment(aes(x=pNeg[1],y=pNeg[2],xend=pPos[1],yend=pPos[2]))+
+  stat_function(fun=line) + xlim(0,100) + ylim(0,100)
 
+#-(w[1]*x + .5*(dot(w,pPos) + dot(w,pNeg)))/w[2]
