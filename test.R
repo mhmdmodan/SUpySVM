@@ -50,7 +50,7 @@ genRand <- function() {c(runif(1,-1,1),runif(1,-1,1))}
 
 #####################
 set.seed(1345)
-pts <- tibble(x = sample(1:100, size=50, replace=TRUE), y = sample(1:100, size=50, replace=TRUE), class = 1)
+pts <- tibble(x = sample(1:100, size=150, replace=TRUE), y = sample(1:100, size=150, replace=TRUE), class = 1)
 
 theorLine <- function(x) {-25/12.5*(x-50)+37.5}
 
