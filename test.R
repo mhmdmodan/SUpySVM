@@ -122,6 +122,18 @@ bisect = pNeg+w/2
 slope = -1/((pPos[2]-pNeg[2])/(pPos[1]-pNeg[1]))
 line <- function(x) {slope*(x - bisect[1]) + bisect[2]}
 ggplot(pts,aes(x=x, y=y, color = class)) + geom_point() + geom_segment(aes(x=pNeg[1],y=pNeg[2],xend=pPos[1],yend=pPos[2]))+
-  stat_function(fun=line) + xlim(0,100) + ylim(0,100)
+  stat_function(fun=line) + xlim(20,60) + ylim(0,100)
 
 #-(w[1]*x + .5*(dot(w,pPos) + dot(w,pNeg)))/w[2]
+
+b <- .5*(w %.% pPos + w %.% pNeg)
+
+lapply(neg, function(x) {w %*% c(x[1]-bisect[1],x[2]-bisect[2])})
+
+test <- function(x) {
+  vec <- vector(mode='numeric',length(x))
+  for(i in length(x)) {
+    vec[i] <- x[i]-bisect[i]
+  }
+  return(vec)
+}
