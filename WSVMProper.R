@@ -75,6 +75,19 @@ WRCH <- function(P, s, u, increment) {
   return(CH)
 }
 
+#Get center of points
+getCenter <- function(P, s) {
+  totalWeights <- sum(s)
+  newS <- sapply(s, function(x){x/totalWeights})
+  
+  cumMean <- vector(mode='numeric', length = length(P[[1]]))
+  for(i in 1:length(P)) {
+    cumMean <- cumMean + P[[i]]*newS[i]
+  }
+  
+  return(cumMean)
+}
+
 #WSVM Algorithm
 WSVM <- function(P, s, y, rchFactor, ep) {
   
@@ -86,11 +99,17 @@ WSVM <- function(P, s, y, rchFactor, ep) {
   sPos <- s[classPos]
   sNeg <- s[classNeg]
   
-  randVec1 <- genRand()
-  randVec2 <- genRand()
-  pPos <- findVertex(pos, sPos, randVec1, rchFactor)
-  pNeg <- findVertex(neg, sNeg, randVec2, rchFactor)
+  # randVec1 <- genRand()
+  # randVec2 <- genRand()
+  # pPos <- findVertex(pos, sPos, randVec1, rchFactor)
+  # pNeg <- findVertex(neg, sNeg, randVec2, rchFactor)
   
+  centerPos <- getCenter(pos, sPos)
+  centerNeg <- getCenter(neg, sNeg)
+  
+  pPos <- findVertex(pos, sPos, centerNeg - centerPos, rchFactor)
+  pNeg <- findVertex(neg, sNeg, centerPos - centerNeg, rchFactor)
+
   while(TRUE) {
     w <- pPos - pNeg
     
@@ -118,34 +137,37 @@ WSVM <- function(P, s, y, rchFactor, ep) {
 }
 
 #####################
-set.seed(1232234)
-pts <- tibble(x = sample(1:160, size=80, replace=TRUE), y = sample(1:90, size=80, replace=TRUE), class = 1) %>% 
-  if(x=)
-ggplot(pts,aes(x=x, y=y, color = class)) + geom_point() + 
-  stat_function(fun=theorLine) + xlim(0,100) + ylim(0,100)
-theorLine <- function(x) {-25/12.5*(x-50)+37.5}
+set.seed(174)
+pts <- tibble(x = sample(1:100, size=80, replace=TRUE)/100, y = sample(1:100, size=80, replace=TRUE)/100, class = 1)
+theorLine <- function(x) {.28/.125*(x-.55)+.5}
 
 for(i in 1:nrow(pts)) {
-  if(pts$y[i] < theorLine(pts$x[i])) {pts[i,3] <- -1}
+  if(pts[i,2] > theorLine(pts[i,1])) {pts[i,3] <- -1}
 }
 
-ggplot(pts,aes(x=x, y=y, color = class)) + geom_point() + 
-  stat_function(fun=theorLine) + xlim(0,100) + ylim(0,100)
+ggplot(pts,aes(x=x, y=y, color = class)) + geom_point() +
+  stat_function(fun=theorLine) + xlim(0,1) + ylim(0,1)
 
 ptsList <- lapply(1:nrow(pts), function(n) as.double(c(pts[n,1],pts[n,2])))
 yList <- pts$class
 weights <- sapply(ptsList, function(n) {1})
 ###########
 
-out <- WSVM(ptsList,weights,yList,1/5,10^-5)
+out <- WSVM(ptsList,weights,yList,1,10^-2)
 
 slope = -1/((out$pPos[2]-out$pNeg[2])/(out$pPos[1]-out$pNeg[1]))
 line <- function(x) {slope*(x - out$bisect[1]) + out$bisect[2]}
 ggplot(pts,aes(x=x, y=y, color = class)) + geom_point() + geom_segment(aes(x=out$pNeg[1],y=out$pNeg[2],xend=out$pPos[1],yend=out$pPos[2]))+
-  stat_function(fun=line) + xlim(0,100) + ylim(0,100)
+  stat_function(fun=line) + xlim(0,1) + ylim(0,1)
 
 #############
 #Test out CH finder
+set.seed(1232234)
+pts <- tibble(x = sample(1:160, size=80, replace=TRUE), y = sample(1:90, size=80, replace=TRUE), class = 1) %>% 
+  if(x=)
+    ggplot(pts,aes(x=x, y=y, color = class)) + geom_point() + 
+  stat_function(fun=theorLine) + xlim(0,100) + ylim(0,100)
+
 chPts <- WRCH(ptsList, weights, 1/5, 0.01)
 ggplot(data=pts, aes(x=x,y=y)) + 
   geom_point() + 
