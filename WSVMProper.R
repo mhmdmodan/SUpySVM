@@ -201,17 +201,26 @@ ggplot(pts,aes(x=x, y=y, color = class)) +
 
 #############
 #Test out CH finder
-set.seed(1232234)
-pts <- tibble(x = sample(1:160, size=80, replace=TRUE), y = sample(1:90, size=80, replace=TRUE), class = 1)
-    ggplot(pts,aes(x=x, y=y, color = class)) + geom_point() + 
-  stat_function(fun=theorLine) + xlim(0,100) + ylim(0,100)
+set.seed(127)
+pts <- tibble(x = sample(1:100, size=15, replace=TRUE)/100, y = sample(1:100, size=15, replace=TRUE)/100, class = 1) %>% 
+  filter(!(x>.7 & x<.8))
 
-chPts <- WRCH(ptsList, weights, 1/5, 0.01)
-ggplot(data=pts, aes(x=x,y=y)) + 
-  geom_point() + 
-  geom_path(data=chPts, aes(x=V1,y=V2), color="#EE6363", size=1.3) +
-  theme_fivethirtyeight() + 
-  xlim(0,100) +
-  ylim(0,100)
+ptsList <- lapply(1:nrow(pts), function(n) as.double(c(pts[n,1],pts[n,2])))
+yList <- pts$class
+weights <- sapply(ptsList, function(n) {1})
 
-ggsave(filename='test.png',width=7,height=7,units='in',dpi=72)
+numFrames <- 150
+increment <- (1/numFrames)*.9
+rFac <- 1
+for(i in 1:numFrames){
+  chPts <- WRCH(ptsList, weights, rFac, 0.01)
+  rchToSave<-ggplot(data=pts, aes(x=x,y=y)) + 
+    geom_path(data=chPts, aes(x=V1,y=V2), color="#EE6363", size=1.3) +
+    geom_point() + 
+    theme_fivethirtyeight() + 
+    xlim(0,1) +
+    ylim(0,1) +
+    labs(title='Convex hull reduction')
+  suppressWarnings(ggsave(filename=paste0('Anims/RCHAnim/',i,'.png'), plot = rchToSave,width=7,height=7,units='in',dpi=200)) 
+  rFac <- rFac - increment
+}
