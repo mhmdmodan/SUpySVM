@@ -138,7 +138,7 @@ WSVM <- function(P, s, y, rchFactor, ep) {
     numLoops <- numLoops + 1
     w <- pPos - pNeg
     
-    #savePlot(list(w=w, bisect=pNeg+w/2, pPos=pPos, pNeg=pNeg), numLoops)
+    savePlot(list(w=w, bisect=pNeg+w/2, pPos=pPos, pNeg=pNeg), numLoops)
     
     vPos <- findVertex(pos, sPos, -w, rchFactor)
     vNeg <- findVertex(neg, sNeg, w, rchFactor)
