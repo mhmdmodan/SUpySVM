@@ -106,6 +106,8 @@ savePlot <- function(params, index) {
   suppressWarnings(ggsave(filename=paste0('Anims/WAnim/',index,'.png'), plot = toSave,width=7,height=7,units='in',dpi=200))
 }
 
+genRand <- function() {c(runif(1,-1,1),runif(1,-1,1))}
+
 #WSVM Algorithm
 WSVM <- function(P, s, y, rchFactor, ep) {
   
@@ -121,10 +123,10 @@ WSVM <- function(P, s, y, rchFactor, ep) {
   # randVec2 <- genRand()
   # pPos <- findVertex(pos, sPos, randVec1, rchFactor)
   # pNeg <- findVertex(neg, sNeg, randVec2, rchFactor)
-  
+
   centerPos <- getCenter(pos, sPos)
   centerNeg <- getCenter(neg, sNeg)
-  
+
   pPos <- findVertex(pos, sPos, centerNeg - centerPos, rchFactor)
   pNeg <- findVertex(neg, sNeg, centerPos - centerNeg, rchFactor)
 
@@ -134,7 +136,7 @@ WSVM <- function(P, s, y, rchFactor, ep) {
     numLoops <- numLoops + 1
     w <- pPos - pNeg
     
-    savePlot(list(w=w, bisect=pNeg+w/2, pPos=pPos, pNeg=pNeg), numLoops)
+    #savePlot(list(w=w, bisect=pNeg+w/2, pPos=pPos, pNeg=pNeg), numLoops)
     
     vPos <- findVertex(pos, sPos, -w, rchFactor)
     vNeg <- findVertex(neg, sNeg, w, rchFactor)
@@ -176,7 +178,7 @@ yList <- pts$class
 weights <- sapply(ptsList, function(n) {1})
 ###########
 
-out <- WSVM(ptsList,weights,yList,1,.2)
+out <- WSVM(ptsList,weights,yList,1,10^-2)
 
 slope = -1/((out$pPos[2]-out$pNeg[2])/(out$pPos[1]-out$pNeg[1]))
 line <- function(x) {slope*(x - out$bisect[1]) + out$bisect[2]}
