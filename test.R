@@ -77,16 +77,10 @@ neg <- ptsList[classNeg]
 sPos <- weights[classPos]
 sNeg <- weights[classNeg]
 
-set.seed(1234)
 randVec1 <- genRand()
 randVec2 <- genRand()
 pPos <- findVertex(pos, sPos, randVec1, rchFactor)
 pNeg <- findVertex(neg, sNeg, randVec2, rchFactor)
-
-randVec1
-pPos
-randVec2
-pNeg
 
 while(TRUE) {
   w <- pPos - pNeg
@@ -128,12 +122,18 @@ ggplot(pts,aes(x=x, y=y, color = class)) + geom_point() + geom_segment(aes(x=pNe
 
 b <- .5*(w %.% pPos + w %.% pNeg)
 
-lapply(neg, function(x) {w %*% c(x[1]-bisect[1],x[2]-bisect[2])})
+all(lapply(neg, function(x) {
+  vec <- vector(mode='numeric',length(x))
+  for(i in 1:length(x)) {
+    vec[i] <- x[i]-bisect[i]
+  }
+  return(w %.% vec)
+}) <0)
 
 test <- function(x) {
   vec <- vector(mode='numeric',length(x))
-  for(i in length(x)) {
+  for(i in 1:length(x)) {
     vec[i] <- x[i]-bisect[i]
   }
-  return(vec)
+  return(w %.% vec)
 }
