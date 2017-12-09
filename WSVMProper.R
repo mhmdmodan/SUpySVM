@@ -3,6 +3,10 @@ library(ggplot2)
 library(ggthemes)
 library(fpCompare)
 
+five38Mod <- theme_fivethirtyeight() + theme(legend.position = "right", 
+                                             legend.direction = 'vertical',
+                                             axis.title = element_text())
+
 dot <- function(x,y) {return((x %*% y)[[1]])}
 `%.%` <- function(x,y) {return((x %*% y)[[1]])}
 
@@ -65,7 +69,10 @@ WRCH <- function(P, s, u, increment) {
   for(angle in angles) {
     CH <- rbind(CH,findVertex(P, s, c(cos(angle),sin(angle)), u))
   }
-  return(CH %>% as.tibble() %>% unique)
+  
+  CH <- CH %>% as.tibble() %>% unique
+  CH[nrow(CH)+1,] <- CH[1,]
+  return(CH)
 }
 
 #WSVM Algorithm
@@ -111,9 +118,11 @@ WSVM <- function(P, s, y, rchFactor, ep) {
 }
 
 #####################
-set.seed(1345)
-pts <- tibble(x = sample(1:100, size=50, replace=TRUE), y = sample(1:100, size=50, replace=TRUE), class = 1)
-
+set.seed(1232234)
+pts <- tibble(x = sample(1:160, size=80, replace=TRUE), y = sample(1:90, size=80, replace=TRUE), class = 1) %>% 
+  if(x=)
+ggplot(pts,aes(x=x, y=y, color = class)) + geom_point() + 
+  stat_function(fun=theorLine) + xlim(0,100) + ylim(0,100)
 theorLine <- function(x) {-25/12.5*(x-50)+37.5}
 
 for(i in 1:nrow(pts)) {
@@ -137,5 +146,12 @@ ggplot(pts,aes(x=x, y=y, color = class)) + geom_point() + geom_segment(aes(x=out
 
 #############
 #Test out CH finder
-chPts <- WRCH(ptsList[which(yList>0)], weights[which(yList>0)], 1/10, 0.02)
-ggplot(data=pts, aes(x=x,y=y)) + geom_point() + geom_point(data=chPts, aes(x=V1,y=V2), color='red')
+chPts <- WRCH(ptsList, weights, 1/5, 0.01)
+ggplot(data=pts, aes(x=x,y=y)) + 
+  geom_point() + 
+  geom_path(data=chPts, aes(x=V1,y=V2), color="#EE6363", size=1.3) +
+  theme_fivethirtyeight() + 
+  xlim(0,100) +
+  ylim(0,100)
+
+ggsave(filename='test.png',width=7,height=7,units='in',dpi=72)
