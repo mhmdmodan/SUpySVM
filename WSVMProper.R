@@ -15,12 +15,23 @@ checkSameDim <- function(n, P) {
   return(TRUE)
 }
 
-getMaxIndex <- function(n, P) {
-  maxInd <- 1
+getMaxIndex <- function(n, P, a) {
+  maxInd <- -1
   for(i in 1:length(P)) {
-    curVal <- dot(n, P[[i]])
-    maxVal <- dot(n, P[[maxInd]])
-    maxInd <- ifelse(curVal > maxVal, i, maxInd)
+    if(a[i] == 0) {
+      maxInd <- i
+      break
+    }
+  }
+  if(maxInd == -1) {
+    stop('None are 0')
+  }
+  for(i in 1:length(P)) {
+    if(a[i] == 0) {
+      curVal <- dot(n, P[[i]])
+      maxVal <- dot(n, P[[maxInd]])
+      maxInd <- ifelse(curVal > maxVal, i, maxInd)
+    }
   }
   return(maxInd)
 }
@@ -33,7 +44,7 @@ findVertex <- function(P, s, n, u) {
   a <- vector(mode = 'numeric', length = length(P))
   total <- 0
   while(total %!=% 1) {
-    i <- getMaxIndex(n, P)
+    i <- getMaxIndex(n, P, a)
     a[i] <- min(s[i]*u, 1-total)
     total <- total + a[i]
   }
@@ -44,6 +55,17 @@ findVertex <- function(P, s, n, u) {
   }
   
   return(vSum)
+}
+
+#Get CH points
+WRCH <- function(P, s, u, increment) {
+  angles <- seq(0+increment, 2*pi, increment)
+  
+  CH <- findVertex(P, s, c(cos(increment),sin(increment)), u)
+  for(angle in angles) {
+    CH <- rbind(CH,findVertex(P, s, c(cos(angle),sin(angle)), u))
+  }
+  return(CH %>% as.tibble() %>% unique)
 }
 
 #WSVM Algorithm
@@ -106,9 +128,14 @@ yList <- pts$class
 weights <- sapply(ptsList, function(n) {1})
 ###########
 
-out <- WSVM(ptsList,weights,yList,1,10^-2)
+out <- WSVM(ptsList,weights,yList,1/5,10^-5)
 
 slope = -1/((out$pPos[2]-out$pNeg[2])/(out$pPos[1]-out$pNeg[1]))
 line <- function(x) {slope*(x - out$bisect[1]) + out$bisect[2]}
 ggplot(pts,aes(x=x, y=y, color = class)) + geom_point() + geom_segment(aes(x=out$pNeg[1],y=out$pNeg[2],xend=out$pPos[1],yend=out$pPos[2]))+
   stat_function(fun=line) + xlim(0,100) + ylim(0,100)
+
+#############
+#Test out CH finder
+chPts <- WRCH(ptsList[which(yList>0)], weights[which(yList>0)], 1/10, 0.02)
+ggplot(data=pts, aes(x=x,y=y)) + geom_point() + geom_point(data=chPts, aes(x=V1,y=V2), color='red')
