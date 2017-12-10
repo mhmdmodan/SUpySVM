@@ -111,7 +111,7 @@ savePlot <- function(params, index, filePath) {
 genRand <- function() {c(runif(1,-1,1),runif(1,-1,1))}
 
 #WSVM Algorithm
-WSVM <- function(P, s, y, rchFactor, ep) {
+WSVM <- function(P, s, y, rchFactor, ep, nonSep) {
   
   classPos <- which(y > 0)
   classNeg <- which(y < 0)
@@ -138,7 +138,11 @@ WSVM <- function(P, s, y, rchFactor, ep) {
     numLoops <- numLoops + 1
     w <- pPos - pNeg
     
-    #savePlot(list(w=w, bisect=pNeg+w/2, pPos=pPos, pNeg=pNeg), numLoops)
+    #savePlot(list(w=w, bisect=pNeg+w/2, pPos=pPos, pNeg=pNeg), numLoops, filePath = 'Anims/WAnim3/')
+    
+    if(sqrt(dot(out$w,out$w)) < nonSep) {
+      stop('Hulls are overlapping!')
+    }
     
     vPos <- findVertex(pos, sPos, -w, rchFactor)
     vNeg <- findVertex(neg, sNeg, w, rchFactor)
@@ -180,12 +184,16 @@ ggplot(pts,aes(x=x, y=y, color = class)) + geom_point() +
 ptsList <- lapply(1:nrow(pts), function(n) as.double(c(pts[n,1],pts[n,2])))
 yList <- pts$class
 weights <- sapply(ptsList, function(n) {1})
+for(i in 1:length(weights)) {
+  if(pts[i,2] > .75 & yList[i] > 0) {weights[i] <- 5}
+  if(pts[i,2] < .2 & yList[i] < 0) {weights[i] <- 3}
+}
 ###################################
 ###################################
 ###################################
 #Indiv CHs
-mu <- 1/20
-numFrames <- 76
+mu <- 1/30
+numFrames <- 75
 increment <- (1/numFrames)*(1-mu)
 rFac <- 1
 for(i in 1:numFrames) {
@@ -194,20 +202,20 @@ for(i in 1:numFrames) {
   toSave <- ggplot(pts,aes(x=x, y=y, color = class)) + 
     geom_path(data=negCH, aes(x=V1,y=V2), color='palegreen3', size=1.3) +
     geom_path(data=posCH, aes(x=V1,y=V2), color="palegreen3", size=1.3) +
-    geom_point() + 
+    geom_point(aes(size=weight)) + 
     scale_color_gradient(low="black", high="#FC6471") +
     xlim(0,1) + 
     ylim(0,1) + 
     theme_fivethirtyeight() + 
     theme(legend.position="none") +
-    labs(title = paste0('Reducing the convex hulls - μ = ',formatC(as.numeric(rFac), format = 'f', flag='0', digits = 3)))
-  ggsave(filename=paste0('Anims/NonSepRCH/',i,'.png'),plot=toSave,width=7,height=7,units='in',dpi=200)
+    labs(title = paste0('Reducing the convex hulls (weighted) - μ = ',formatC(as.numeric(rFac), format = 'f', flag='0', digits = 3)))
+  ggsave(filename=paste0('Anims/NonSepWRCH/',76,'.png'),plot=toSave,width=7,height=7,units='in',dpi=200)
   rFac <- rFac - increment
 }
 
 #################################
 
-out <- WSVM(ptsList,weights,yList,1,10^-5)
+out <- WSVM(ptsList,weights,yList,1/10,10^-2, nonSep = 10^-1)
 
 slope = -1/((out$pPos[2]-out$pNeg[2])/(out$pPos[1]-out$pNeg[1]))
 line <- function(x) {slope*(x - out$bisect[1]) + out$bisect[2]}
@@ -223,7 +231,7 @@ ggplot(pts,aes(x=x, y=y, color = class)) +
   theme_fivethirtyeight() + 
   theme(legend.position="none") +
   labs(title = 'Calculating the Hyperplane')
- ggsave(filename='Static/optimal.png',width=7,height=7,units='in',dpi=200)
+ ggsave(filename='Static/optimal2.png',width=7,height=7,units='in',dpi=200)
 
 #############
 #Test out CH finder
