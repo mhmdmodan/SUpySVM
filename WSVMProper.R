@@ -138,7 +138,7 @@ WSVM <- function(P, s, y, rchFactor, ep) {
     numLoops <- numLoops + 1
     w <- pPos - pNeg
     
-    savePlot(list(w=w, bisect=pNeg+w/2, pPos=pPos, pNeg=pNeg), numLoops)
+    #savePlot(list(w=w, bisect=pNeg+w/2, pPos=pPos, pNeg=pNeg), numLoops)
     
     vPos <- findVertex(pos, sPos, -w, rchFactor)
     vNeg <- findVertex(neg, sNeg, w, rchFactor)
@@ -162,7 +162,8 @@ WSVM <- function(P, s, y, rchFactor, ep) {
   print(numLoops)
   return(list(w=w, bisect=pNeg+w/2, pPos=pPos, pNeg=pNeg))
 }
-
+#####################
+# SETUP
 #####################
 set.seed(174)
 pts <- tibble(x = sample(1:100, size=80, replace=TRUE)/100, y = sample(1:100, size=80, replace=TRUE)/100, class = 1)
@@ -178,10 +179,13 @@ ggplot(pts,aes(x=x, y=y, color = class)) + geom_point() +
 ptsList <- lapply(1:nrow(pts), function(n) as.double(c(pts[n,1],pts[n,2])))
 yList <- pts$class
 weights <- sapply(ptsList, function(n) {1})
-###########
+###################################
+###################################
+###################################
+
 negCH <- WRCH(ptsList[which(yList<0)], weights[which(yList<0)], 1, 0.01)
 posCH <- WRCH(ptsList[which(yList>0)], weights[which(yList>0)], 1, 0.01)
-out <- WSVM(ptsList,weights,yList,1,.07)
+out <- WSVM(ptsList,weights,yList,1,10^-5)
 
 slope = -1/((out$pPos[2]-out$pNeg[2])/(out$pPos[1]-out$pNeg[1]))
 line <- function(x) {slope*(x - out$bisect[1]) + out$bisect[2]}
@@ -197,7 +201,7 @@ ggplot(pts,aes(x=x, y=y, color = class)) +
   theme_fivethirtyeight() + 
   theme(legend.position="none") +
   labs(title = 'Calculating the Hyperplane')
- ggsave(filename='test.png',width=7,height=7,units='in',dpi=200)
+ ggsave(filename='Static/optimal.png',width=7,height=7,units='in',dpi=200)
 
 #############
 #Test out CH finder
@@ -220,7 +224,7 @@ for(i in 1:numFrames){
     theme_fivethirtyeight() + 
     xlim(0,1) +
     ylim(0,1) +
-    labs(title='Convex hull reduction')
+    labs(title=paste0('Convex hull reduction - μ = ',formatC(as.numeric(rFac), format = 'f', flag='0', digits = 3)))
   suppressWarnings(ggsave(filename=paste0('Anims/RCHAnim/',i,'.png'), plot = rchToSave,width=7,height=7,units='in',dpi=200)) 
   rFac <- rFac - increment
 }
