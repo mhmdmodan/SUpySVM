@@ -211,20 +211,23 @@ pts <- tibble(x = sample(1:100, size=15, replace=TRUE)/100, y = sample(1:100, si
 
 ptsList <- lapply(1:nrow(pts), function(n) as.double(c(pts[n,1],pts[n,2])))
 yList <- pts$class
-weights <- sapply(ptsList, function(n) {1})
+#weights <- sapply(ptsList, function(n) {1})
+weights <- c(1,1,1,1,1,1,1,5,2,3,1,1,1)
 
 numFrames <- 150
 increment <- (1/numFrames)*.9
 rFac <- 1
 for(i in 1:numFrames){
   chPts <- WRCH(ptsList, weights, rFac, 0.01)
-  rchToSave<-ggplot(data=pts, aes(x=x,y=y)) + 
+  rchToSave <- ggplot(data=pts, aes(x=x,y=y)) + 
     geom_path(data=chPts, aes(x=V1,y=V2), color="#EE6363", size=1.3) +
-    geom_point() + 
+    geom_point(aes(size=weight)) + 
     theme_fivethirtyeight() + 
+    theme(legend.position = "right", 
+          legend.direction = 'vertical') +
     xlim(0,1) +
     ylim(0,1) +
     labs(title=paste0('Convex hull reduction - μ = ',formatC(as.numeric(rFac), format = 'f', flag='0', digits = 3)))
-  suppressWarnings(ggsave(filename=paste0('Anims/RCHAnim/',i,'.png'), plot = rchToSave,width=7,height=7,units='in',dpi=200)) 
+  suppressWarnings(ggsave(filename=paste0('Anims/WRCHAnim/',i,'.png'), plot = rchToSave,width=7,height=7,units='in',dpi=200)) 
   rFac <- rFac - increment
 }
