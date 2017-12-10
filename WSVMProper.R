@@ -96,7 +96,7 @@ savePlot <- function(params, index, filePath) {
   toSave <- ggplot(pts,aes(x=x, y=y, color = class)) + 
     geom_path(data=negCH, aes(x=V1,y=V2), color='palegreen3', size=1.3) +
     geom_path(data=posCH, aes(x=V1,y=V2), color="palegreen3", size=1.3) +
-    geom_point() + 
+    geom_point(aes(size = weight)) + 
     geom_segment(aes(x=out$pNeg[1],y=out$pNeg[2],xend=out$pPos[1],yend=out$pPos[2]), color = "dodgerblue", size=1.4, lineend = 'round')+
     stat_function(fun=line, color = c("#7D5BA6"), size=1.0) + 
     scale_color_gradient(low="black", high="#FC6471") +
@@ -140,7 +140,7 @@ WSVM <- function(P, s, y, rchFactor, ep, nonSep) {
     
     #savePlot(list(w=w, bisect=pNeg+w/2, pPos=pPos, pNeg=pNeg), numLoops, filePath = 'Anims/WAnim3/')
     
-    if(sqrt(dot(out$w,out$w)) < nonSep) {
+    if(sqrt(dot(w,w)) < nonSep) {
       stop('Hulls are overlapping!')
     }
     
@@ -215,7 +215,7 @@ for(i in 1:numFrames) {
 
 #################################
 
-out <- WSVM(ptsList,weights,yList,1/10,10^-2, nonSep = 10^-1)
+out <- WSVM(ptsList,weights,yList,1/30,10^-7, nonSep = 10^-5)
 
 slope = -1/((out$pPos[2]-out$pNeg[2])/(out$pPos[1]-out$pNeg[1]))
 line <- function(x) {slope*(x - out$bisect[1]) + out$bisect[2]}
