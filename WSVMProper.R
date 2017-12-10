@@ -88,7 +88,7 @@ getCenter <- function(P, s) {
   return(cumMean)
 }
 
-savePlot <- function(params, index) {
+savePlot <- function(params, index, filePath) {
   out <- params
   
   slope = -1/((out$pPos[2]-out$pNeg[2])/(out$pPos[1]-out$pNeg[1]))
@@ -105,7 +105,7 @@ savePlot <- function(params, index) {
     theme_fivethirtyeight() + 
     theme(legend.position="none") +
     labs(title = 'Calculating the Hyperplane')
-  suppressWarnings(ggsave(filename=paste0('Anims/WAnim/',index,'.png'), plot = toSave,width=7,height=7,units='in',dpi=200))
+  suppressWarnings(ggsave(filename=paste0(filePath,index,'.png'), plot = toSave,width=7,height=7,units='in',dpi=200))
 }
 
 genRand <- function() {c(runif(1,-1,1),runif(1,-1,1))}
@@ -165,12 +165,13 @@ WSVM <- function(P, s, y, rchFactor, ep) {
 #####################
 # SETUP
 #####################
-set.seed(174)
-pts <- tibble(x = sample(1:100, size=80, replace=TRUE)/100, y = sample(1:100, size=80, replace=TRUE)/100, class = 1)
+set.seed(1745446784)
+pts <- tibble(x = sample(1:100, size=100, replace=TRUE)/100, y = sample(1:100, size=100, replace=TRUE)/100, class = 1)
 theorLine <- function(x) {.28/.125*(x-.55)+.5}
 
 for(i in 1:nrow(pts)) {
   if(pts[i,2] > theorLine(pts[i,1])) {pts[i,3] <- -1}
+  if(abs(pts[i,2] - theorLine(pts[i,1])) <= .5) {pts[i,3] <- sample(c(1,-1),1)}
 }
 
 ggplot(pts,aes(x=x, y=y, color = class)) + geom_point() +
@@ -182,9 +183,30 @@ weights <- sapply(ptsList, function(n) {1})
 ###################################
 ###################################
 ###################################
+#Indiv CHs
+mu <- 1/20
+numFrames <- 76
+increment <- (1/numFrames)*(1-mu)
+rFac <- 1
+for(i in 1:numFrames) {
+  negCH <- WRCH(ptsList[which(yList<0)], weights[which(yList<0)], rFac, 0.01)
+  posCH <- WRCH(ptsList[which(yList>0)], weights[which(yList>0)], rFac, 0.01)
+  toSave <- ggplot(pts,aes(x=x, y=y, color = class)) + 
+    geom_path(data=negCH, aes(x=V1,y=V2), color='palegreen3', size=1.3) +
+    geom_path(data=posCH, aes(x=V1,y=V2), color="palegreen3", size=1.3) +
+    geom_point() + 
+    scale_color_gradient(low="black", high="#FC6471") +
+    xlim(0,1) + 
+    ylim(0,1) + 
+    theme_fivethirtyeight() + 
+    theme(legend.position="none") +
+    labs(title = paste0('Reducing the convex hulls - μ = ',formatC(as.numeric(rFac), format = 'f', flag='0', digits = 3)))
+  ggsave(filename=paste0('Anims/NonSepRCH/',i,'.png'),plot=toSave,width=7,height=7,units='in',dpi=200)
+  rFac <- rFac - increment
+}
 
-negCH <- WRCH(ptsList[which(yList<0)], weights[which(yList<0)], 1, 0.01)
-posCH <- WRCH(ptsList[which(yList>0)], weights[which(yList>0)], 1, 0.01)
+#################################
+
 out <- WSVM(ptsList,weights,yList,1,10^-5)
 
 slope = -1/((out$pPos[2]-out$pNeg[2])/(out$pPos[1]-out$pNeg[1]))
@@ -214,7 +236,7 @@ yList <- pts$class
 #weights <- sapply(ptsList, function(n) {1})
 weights <- c(1,1,1,1,1,1,1,5,2,3,1,1,1)
 
-numFrames <- 150
+numFrames <- 155
 increment <- (1/numFrames)*.9
 rFac <- 1
 for(i in 1:numFrames){
@@ -227,7 +249,8 @@ for(i in 1:numFrames){
           legend.direction = 'vertical') +
     xlim(0,1) +
     ylim(0,1) +
-    labs(title=paste0('Convex hull reduction - μ = ',formatC(as.numeric(rFac), format = 'f', flag='0', digits = 3)))
+    labs(title=paste0('Weighted convex hull reduction - μ = ',formatC(as.numeric(rFac), format = 'f', flag='0', digits = 3)),
+         size='Weight')
   suppressWarnings(ggsave(filename=paste0('Anims/WRCHAnim/',i,'.png'), plot = rchToSave,width=7,height=7,units='in',dpi=200)) 
   rFac <- rFac - increment
 }
