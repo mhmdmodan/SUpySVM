@@ -30,10 +30,16 @@ smWine[2:4] <- as.tibble(lapply(smWine[2:4], normalize))
 
 yList <- smWine$type
 ptsList <- lapply(1:nrow(smWine), function(n) as.double(c(smWine[n,2],smWine[n,3],smWine[n,4])))
+posClass <- which(yList>0)
+negClass <- which(yList<0)
 weights <- sapply(ptsList, function(n) {1})
-mu <- findMu(weights[which(yList>0)], weights[which(yList<0)])
 
-out <- WSVM(ptsList, weights, yList, mu, 10^-8 ,10^-5)
+# weights[posClass] <- rep(1/length(posClass), each=length(posClass))
+# weights[negClass] <- rep(1/length(negClass), each=length(negClass))
+
+mu <- findMu(weights[posClass], weights[negClass])
+
+out <- WSVM(ptsList, weights, yList, mu, 10^-5 ,10^-5)
 
 pred <- sapply(ptsList, function(pt) {
   ifelse((pt-out$bisect) %.% out$w > 0, 1, -1)
