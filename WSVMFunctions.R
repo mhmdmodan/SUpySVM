@@ -114,7 +114,7 @@ WSVM <- function(P, s, y, rchFactor, ep, nonSep) {
     vPos <- findVertex(pos, sPos, -w, rchFactor)
     vNeg <- findVertex(neg, sNeg, w, rchFactor)
     
-    if(sqrt(dot(out$w,out$w)) < nonSep) {
+    if(sqrt(dot(w,w)) < nonSep) {
       stop('Hulls are overlapping!')
     }
     
@@ -136,4 +136,8 @@ WSVM <- function(P, s, y, rchFactor, ep, nonSep) {
   }
   print(numLoops)
   return(list(w=w, bisect=pNeg+w/2, pPos=pPos, pNeg=pNeg))
+}
+
+normalize <- function(x) {
+  return ((x - min(x)) / (max(x) - min(x)))
 }
