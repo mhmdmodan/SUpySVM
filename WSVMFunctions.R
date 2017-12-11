@@ -1,11 +1,4 @@
 library(tidyverse)
-library(ggplot2)
-library(ggthemes)
-library(fpCompare)
-
-five38Mod <- theme_fivethirtyeight() + theme(legend.position = "right", 
-                                             legend.direction = 'vertical',
-                                             axis.title = element_text())
 
 dot <- function(x,y) {return((x %*% y)[[1]])}
 `%.%` <- function(x,y) {return((x %*% y)[[1]])}
@@ -88,25 +81,6 @@ getCenter <- function(P, s) {
   return(cumMean)
 }
 
-#Save plot
-savePlot <- function(params, index) {
-  out <- params
-  
-  slope = -1/((out$pPos[2]-out$pNeg[2])/(out$pPos[1]-out$pNeg[1]))
-  line <- function(x) {slope*(x - out$bisect[1]) + out$bisect[2]}
-  toSave <- ggplot(pts,aes(x=x, y=y, color = class)) + 
-    geom_point() + 
-    geom_segment(aes(x=out$pNeg[1],y=out$pNeg[2],xend=out$pPos[1],yend=out$pPos[2]), color = "dodgerblue", size=1.4, lineend = 'round')+
-    stat_function(fun=line, color = c("#7D5BA6"), size=1.0) + 
-    scale_color_gradient(low="black", high="#FC6471") +
-    xlim(0,1) + 
-    ylim(0,1) + 
-    theme_fivethirtyeight() + 
-    theme(legend.position="none") +
-    labs(title = 'Calculating the Hyperplane')
-  suppressWarnings(ggsave(filename=paste0('Anims/WAnim/',index,'.png'), plot = toSave,width=7,height=7,units='in',dpi=200))
-}
-
 #Find a mu
 findMu <- function(weights1,weights2) {
   return(1/(0.9*min(sum(weights1), sum(weights2))))
@@ -125,32 +99,25 @@ WSVM <- function(P, s, y, rchFactor, ep, nonSep) {
   sPos <- s[classPos]
   sNeg <- s[classNeg]
   
-  # randVec1 <- genRand()
-  # randVec2 <- genRand()
-  # pPos <- findVertex(pos, sPos, randVec1, rchFactor)
-  # pNeg <- findVertex(neg, sNeg, randVec2, rchFactor)
-
   centerPos <- getCenter(pos, sPos)
   centerNeg <- getCenter(neg, sNeg)
-
+  
   pPos <- findVertex(pos, sPos, centerNeg - centerPos, rchFactor)
   pNeg <- findVertex(neg, sNeg, centerPos - centerNeg, rchFactor)
-
+  
   numLoops <- 0
   
   while(TRUE) {
     numLoops <- numLoops + 1
     w <- pPos - pNeg
     
-    #savePlot(list(w=w, bisect=pNeg+w/2, pPos=pPos, pNeg=pNeg), numLoops)
-    
     vPos <- findVertex(pos, sPos, -w, rchFactor)
     vNeg <- findVertex(neg, sNeg, w, rchFactor)
-
+    
     if(sqrt(dot(out$w,out$w)) < nonSep) {
       stop('Hulls are overlapping!')
     }
-        
+    
     if((1 - dot(w, (pPos - vNeg))/dot(w,w)) < ep & (1 - dot(w, (vPos - pNeg))/dot(w,w)) < ep) {
       break
     }
@@ -170,53 +137,3 @@ WSVM <- function(P, s, y, rchFactor, ep, nonSep) {
   print(numLoops)
   return(list(w=w, bisect=pNeg+w/2, pPos=pPos, pNeg=pNeg))
 }
-
-#####################
-set.seed(174)
-pts <- tibble(x = sample(1:100, size=80, replace=TRUE)/100, y = sample(1:100, size=80, replace=TRUE)/100, class = 1)
-theorLine <- function(x) {.28/.125*(x-.55)+.5}
-
-for(i in 1:nrow(pts)) {
-  if(pts[i,2] > theorLine(pts[i,1])) {pts[i,3] <- -1}
-}
-
-ggplot(pts,aes(x=x, y=y, color = class)) + geom_point() +
-  stat_function(fun=theorLine) + xlim(0,1) + ylim(0,1)
-
-ptsList <- lapply(1:nrow(pts), function(n) as.double(c(pts[n,1],pts[n,2])))
-yList <- pts$class
-weights <- sapply(ptsList, function(n) {1})
-###########
-
-out <- WSVM(ptsList,weights,yList,1,10^-2)
-
-slope = -1/((out$pPos[2]-out$pNeg[2])/(out$pPos[1]-out$pNeg[1]))
-line <- function(x) {slope*(x - out$bisect[1]) + out$bisect[2]}
-ggplot(pts,aes(x=x, y=y, color = class)) + 
-  geom_point() + 
-  geom_segment(aes(x=out$pNeg[1],y=out$pNeg[2],xend=out$pPos[1],yend=out$pPos[2]), color = "dodgerblue", size=1.4, lineend = 'round')+
-  stat_function(fun=line, color = c("#7D5BA6"), size=1.0) + 
-  scale_color_gradient(low="black", high="#FC6471") +
-  xlim(0,1) + 
-  ylim(0,1) + 
-  theme_fivethirtyeight() + 
-  theme(legend.position="none") +
-  labs(title = 'Calculating the Hyperplane')
- ggsave(filename='test.png',width=7,height=7,units='in',dpi=200)
-
-#############
-#Test out CH finder
-set.seed(1232234)
-pts <- tibble(x = sample(1:160, size=80, replace=TRUE), y = sample(1:90, size=80, replace=TRUE), class = 1)
-    ggplot(pts,aes(x=x, y=y, color = class)) + geom_point() + 
-  stat_function(fun=theorLine) + xlim(0,100) + ylim(0,100)
-
-chPts <- WRCH(ptsList, weights, 1/5, 0.01)
-ggplot(data=pts, aes(x=x,y=y)) + 
-  geom_point() + 
-  geom_path(data=chPts, aes(x=V1,y=V2), color="#EE6363", size=1.3) +
-  theme_fivethirtyeight() + 
-  xlim(0,100) +
-  ylim(0,100)
-
-ggsave(filename='test.png',width=7,height=7,units='in',dpi=72)
