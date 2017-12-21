@@ -1,3 +1,17 @@
-\begin{thebibliography}{}
+\begin{thebibliography}{1}
+
+\bibitem{theodoridis_reduced_2007}
+S.~Theodoridis and M.~Mavroforakis, ``Reduced {Convex} {Hulls}: {A} {Geometric}
+  {Approach} to {Support} {Vector} {Machines} [{Lecture} {Notes}],'' {\em IEEE
+  Signal Processing Magazine}, vol.~24, pp.~119--122, May 2007.
+
+\bibitem{franc_iterative_2003}
+V.~Franc and V.~Hlaváč, ``An iterative algorithm learning the maximal margin
+  classifier,'' {\em Pattern Recognition}, vol.~36, pp.~1985--1996, Sept. 2003.
+
+\bibitem{goodrich_training_2011}
+B.~Goodrich, D.~Albrecht, and P.~Tischer, ``Training weighted {SVMs} using a
+  generalized {Schlesinger}-{Kozinec} algorithm,'' pp.~2435--2440, IEEE, Nov.
+  2011.
 
 \end{thebibliography}

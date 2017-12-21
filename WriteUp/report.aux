@@ -17,13 +17,50 @@
 \providecommand\HyField@AuxAddToFields[1]{}
 \providecommand\HyField@AuxAddToCoFields[2]{}
 \@writefile{toc}{\contentsline {section}{\numberline {1}Introduction}{1}{section.1}}
-\citation{Ga}
-\bibdata{ExportedItems}
-\bibstyle{ieeetr}
+\citation{theodoridis_reduced_2007}
 \@writefile{toc}{\contentsline {section}{\numberline {2}What is an SVM?}{2}{section.2}}
 \@writefile{lot}{\contentsline {table}{\numberline {1}{\ignorespaces The \texttt  {iris} dataset in ${\rm  I\tmspace  -\thinmuskip {.1667em}R}^{2}$}}{2}{table.1}}
 \newlabel{table:iris}{{Table\nobreakspace  {}1}{2}{The \texttt {iris} dataset in ${\rm I\!R}^{2}$}{table.1}{}}
-\@writefile{toc}{\contentsline {section}{\numberline {3}Gabai's Theorem}{2}{section.3}}
-\@writefile{toc}{\contentsline {section}{\numberline {A}Code}{2}{appendix.A}}
+\@writefile{toc}{\contentsline {section}{\numberline {3}Defining the Optimization Problem}{2}{section.3}}
+\citation{franc_iterative_2003}
+\citation{goodrich_training_2011}
 \@writefile{lof}{\contentsline {figure}{\numberline {1}{\ignorespaces A dataset in ${\rm  I\tmspace  -\thinmuskip {.1667em}R}^{v}$ with associated positive (salmon) and negative (black) classes. $w$ indicates the vector spanning the shortest distance between convex hulls of the classes (green), pointing to the positive class, defining the maximum margin (orange) hyperplane (purple) as its perpendicular bisector}}{3}{figure.1}}
 \newlabel{fig:margin}{{Figure\nobreakspace  {}1}{3}{A dataset in ${\rm I\!R}^{v}$ with associated positive (salmon) and negative (black) classes. $w$ indicates the vector spanning the shortest distance between convex hulls of the classes (green), pointing to the positive class, defining the maximum margin (orange) hyperplane (purple) as its perpendicular bisector}{figure.1}{}}
+\newlabel{minim}{{3.2}{3}{Defining the Optimization Problem}{equation.3.2}{}}
+\newlabel{subto}{{3.3}{3}{Defining the Optimization Problem}{equation.3.3}{}}
+\@writefile{toc}{\contentsline {section}{\numberline {4}The Schlesinger-Kozinec Algorithm}{3}{section.4}}
+\citation{goodrich_training_2011}
+\@writefile{loa}{\contentsline {algorithm}{\numberline {1}{\ignorespaces Finding a CH vertex}}{4}{algorithm.1}}
+\newlabel{euclid}{{1}{4}{The Schlesinger-Kozinec Algorithm}{algorithm.1}{}}
+\newlabel{alg:findVert}{{1}{4}{The Schlesinger-Kozinec Algorithm}{algorithm.1}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {2}{\ignorespaces the findVertex routine will find the vertex $x_{i}$ on the convex hull of $P$ in the direction of $\mathbf  {n}$}}{4}{figure.2}}
+\newlabel{fig:findVert}{{Figure\nobreakspace  {}2}{4}{the findVertex routine will find the vertex $x_{i}$ on the convex hull of $P$ in the direction of $\mathbf {n}$}{figure.2}{}}
+\newlabel{eqn:w}{{4.1}{4}{The Schlesinger-Kozinec Algorithm}{equation.4.1}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {4.1}Initialization}{4}{subsection.4.1}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {4.2}Stopping Conditions}{4}{subsection.4.2}}
+\newlabel{eqn:stop1}{{4.2}{4}{Stopping Conditions}{equation.4.2}{}}
+\newlabel{eqn:stop2}{{4.3}{4}{Stopping Conditions}{equation.4.3}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {4.3}Adaptation}{5}{subsection.4.3}}
+\newlabel{eqn:newp}{{4.4}{5}{Adaptation}{equation.4.4}{}}
+\newlabel{eqn:orthog}{{4.5}{5}{Adaptation}{equation.4.5}{}}
+\newlabel{eqn:posupdate}{{4.6}{5}{Adaptation}{equation.4.6}{}}
+\newlabel{eqn:orthogneg}{{4.7}{5}{Adaptation}{equation.4.7}{}}
+\newlabel{eqn:negupdate}{{4.8}{5}{Adaptation}{equation.4.8}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {3}{\ignorespaces A new $p_{pos}$ is found such that it minimizes distance to $p_{neg}$. This requires that the new $w$ be orthogonal to $p_{pos}-v_{pos}$.}}{5}{figure.3}}
+\newlabel{fig:updateFig}{{Figure\nobreakspace  {}3}{5}{A new $p_{pos}$ is found such that it minimizes distance to $p_{neg}$. This requires that the new $w$ be orthogonal to $p_{pos}-v_{pos}$}{figure.3}{}}
+\citation{franc_iterative_2003}
+\citation{goodrich_training_2011}
+\citation{goodrich_training_2011}
+\citation{goodrich_training_2011}
+\@writefile{lof}{\contentsline {figure}{\numberline {4}{\ignorespaces Left: $\mu = 1$, non-linearly separable hulls. Right: Weighted reduction to $\mu = 1/30$. Linearly separable hulls, SK proceeds as normal}}{6}{figure.4}}
+\newlabel{reduction}{{Figure\nobreakspace  {}4}{6}{Left: $\mu = 1$, non-linearly separable hulls. Right: Weighted reduction to $\mu = 1/30$. Linearly separable hulls, SK proceeds as normal}{figure.4}{}}
+\@writefile{toc}{\contentsline {section}{\numberline {5}Weighted Convex Hull Reduction}{6}{section.5}}
+\newlabel{wrch}{{5.1}{6}{Weighted Convex Hull Reduction}{equation.5.1}{}}
+\citation{goodrich_training_2011}
+\bibdata{ExportedItems}
+\bibcite{theodoridis_reduced_2007}{1}
+\bibcite{franc_iterative_2003}{2}
+\bibcite{goodrich_training_2011}{3}
+\bibstyle{ieeetr}
+\@writefile{toc}{\contentsline {section}{\numberline {6}Tests}{7}{section.6}}
+\@writefile{toc}{\contentsline {section}{\numberline {7}Conclusion and Future}{7}{section.7}}

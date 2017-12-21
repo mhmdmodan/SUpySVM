@@ -1,4 +1,10 @@
 \BOOKMARK [1][-]{section.1}{Introduction}{}% 1
 \BOOKMARK [1][-]{section.2}{What is an SVM?}{}% 2
-\BOOKMARK [1][-]{section.3}{Gabai's Theorem}{}% 3
-\BOOKMARK [1][-]{appendix.A}{Code}{}% 4
+\BOOKMARK [1][-]{section.3}{Defining the Optimization Problem}{}% 3
+\BOOKMARK [1][-]{section.4}{The Schlesinger-Kozinec Algorithm}{}% 4
+\BOOKMARK [2][-]{subsection.4.1}{Initialization}{section.4}% 5
+\BOOKMARK [2][-]{subsection.4.2}{Stopping Conditions}{section.4}% 6
+\BOOKMARK [2][-]{subsection.4.3}{Adaptation}{section.4}% 7
+\BOOKMARK [1][-]{section.5}{Weighted Convex Hull Reduction}{}% 8
+\BOOKMARK [1][-]{section.6}{Tests}{}% 9
+\BOOKMARK [1][-]{section.7}{Conclusion and Future}{}% 10

@@ -3,46 +3,46 @@ Capacity: max_strings=100000, hash_size=100000, hash_prime=85009
 The top-level auxiliary file: report.aux
 The style file: ieeetr.bst
 Database file #1: ExportedItems.bib
-Warning--I didn't find a database entry for "Ga"
-You've used 0 entries,
+Warning--empty booktitle in goodrich_training_2011
+You've used 3 entries,
             1876 wiz_defined-function locations,
-            479 strings with 3479 characters,
-and the built_in function-call counts, 20 in all, are:
-= -- 0
-> -- 0
+            498 strings with 4009 characters,
+and the built_in function-call counts, 1102 in all, are:
+= -- 120
+> -- 27
 < -- 0
-+ -- 0
-- -- 0
-* -- 2
-:= -- 9
-add.period$ -- 0
-call.type$ -- 0
-change.case$ -- 0
++ -- 10
+- -- 7
+* -- 77
+:= -- 145
+add.period$ -- 3
+call.type$ -- 3
+change.case$ -- 3
 chr.to.int$ -- 0
-cite$ -- 0
-duplicate$ -- 0
-empty$ -- 1
-format.name$ -- 0
-if$ -- 1
+cite$ -- 4
+duplicate$ -- 56
+empty$ -- 98
+format.name$ -- 7
+if$ -- 269
 int.to.chr$ -- 0
-int.to.str$ -- 0
-missing$ -- 0
-newline$ -- 3
-num.names$ -- 0
-pop$ -- 0
+int.to.str$ -- 3
+missing$ -- 3
+newline$ -- 12
+num.names$ -- 3
+pop$ -- 9
 preamble$ -- 1
 purify$ -- 0
 quote$ -- 0
-skip$ -- 1
+skip$ -- 52
 stack$ -- 0
-substring$ -- 0
-swap$ -- 0
+substring$ -- 112
+swap$ -- 30
 text.length$ -- 0
 text.prefix$ -- 0
 top$ -- 0
 type$ -- 0
-warning$ -- 0
-while$ -- 0
-width$ -- 0
-write$ -- 2
+warning$ -- 1
+while$ -- 12
+width$ -- 4
+write$ -- 31
 (There was 1 warning)
