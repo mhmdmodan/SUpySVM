@@ -4,6 +4,16 @@ library(fpCompare)
 dot <- function(x,y) {return((x %*% y)[[1]])}
 `%.%` <- function(x,y) {return((x %*% y)[[1]])}
 
+clamp <- function(expr, minim, maxim) {
+  if(expr < minim) {
+    return(minim)
+  } else if(expr > maxim) {
+    return(maxim)
+  } else {
+    return(expr)
+  }
+}
+
 checkSameDim <- function(n, P) {
   if(!is.list(P)) {stop('P is not a list')}
   dimension <- length(n)
@@ -52,16 +62,16 @@ findVertex <- function(P, s, n, u) {
     vSum <- vSum + a[i]*P[[i]]
   }
   
-  return(vSum)
+  return(list(pt = vSum, wt = a))
 }
 
 #Get CH points
 WRCH <- function(P, s, u, increment) {
   angles <- seq(0+increment, 2*pi, increment)
   
-  CH <- findVertex(P, s, c(cos(increment),sin(increment)), u)
+  CH <- findVertex(P, s, c(cos(increment),sin(increment)), u)$pt
   for(angle in angles) {
-    CH <- rbind(CH,findVertex(P, s, c(cos(angle),sin(angle)), u))
+    CH <- rbind(CH,findVertex(P, s, c(cos(angle),sin(angle)), u)$pt)
   }
   
   CH <- CH %>% as.tibble() %>% unique
@@ -106,41 +116,50 @@ WSVM <- function(P, s, y, rchFactor, ep, nonSep) {
   pPos <- findVertex(pos, sPos, centerNeg - centerPos, rchFactor)
   pNeg <- findVertex(neg, sNeg, centerPos - centerNeg, rchFactor)
   
+  pPosPt <- pPos$pt
+  pNegPt <- pNeg$pt
+  pPosWt <- pPos$wt
+  pNegWt <- pNeg$wt
+  
   numLoops <- 0
   
   while(TRUE) {
     numLoops <- numLoops + 1
-    w <- pPos - pNeg
+    w <- pPosPt - pNegPt
     
     vPos <- findVertex(pos, sPos, -w, rchFactor)
     vNeg <- findVertex(neg, sNeg, w, rchFactor)
+    
+    vPosPt <- vPos$pt
+    vNegPt <- vNeg$pt
+    vPosWt <- vPos$wt
+    vNegWt <- vNeg$wt
     
     if(sqrt(dot(w,w)) < nonSep) {
       stop('Hulls are overlapping!')
     }
     
-    if((1 - dot(w, (pPos - vNeg))/dot(w,w)) < ep & (1 - dot(w, (vPos - pNeg))/dot(w,w)) < ep) {
+    if((1 - dot(w, (pPosPt - vNegPt))/dot(w,w)) < ep & (1 - dot(w, (vPosPt - pNegPt))/dot(w,w)) < ep) {
       break
     }
     
-    if(w %.% (pPos - vPos) > w %.% (vNeg - pNeg)) {
+    if(w %.% (pPosPt - vPosPt) > w %.% (vNegPt - pNegPt)) {
       
-      q <- ((pPos - pNeg) %.% (pPos - vPos))/dot(pPos - vPos,pPos - vPos)
-      if(q < 0) {q <- 0}
-      if(q > 1) {q <- 1}
-      pPos <- (1-q)*pPos + q*vPos
+      #q <- ((pPosPt - pNegPt) %.% (pPosPt - vPosPt))/dot(pPosPt - vPosPt,pPosPt - vPosPt)
+      
+      pPosPt <- (1-q)*pPosPt + q*vPosPt
       
     } else {
       
-      q <- -((pPos - pNeg) %.% (pNeg - vNeg))/dot(pNeg - vNeg,pNeg - vNeg)
+      q <- -((pPosPt - pNegPt) %.% (pNegPt - vNegPt))/dot(pNegPt - vNegPt,pNegPt - vNegPt)
       if(q < 0) {q <- 0}
       if(q > 1) {q <- 1}
-      pNeg <- (1-q)*pNeg + q*vNeg
+      pNegPt <- (1-q)*pNegPt + q*vNegPt
       
     }
   }
   print(numLoops)
-  return(list(w=w, bisect=.5*(w%.%pPos + w%.%pNeg), pPos=pPos, pNeg=pNeg))
+  return(list(w=w, bisect=.5*(w%.%pPosPt + w%.%pNegPt), pPos=pPosPt, pNeg=pNegPt))
 }
 
 normalize <- function(x) {
