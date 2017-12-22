@@ -126,19 +126,25 @@ WSVM <- function(P, s, y, rchFactor, ep, nonSep) {
     if(w %.% (pPos - vPos) > w %.% (vNeg - pNeg)) {
       
       q <- ((pPos - pNeg) %.% (pPos - vPos))/dot(pPos - vPos,pPos - vPos)
+      if(q < 0) {q <- 0}
+      if(q > 1) {q <- 1}
       pPos <- (1-q)*pPos + q*vPos
       
     } else {
       
       q <- -((pPos - pNeg) %.% (pNeg - vNeg))/dot(pNeg - vNeg,pNeg - vNeg)
+      if(q < 0) {q <- 0}
+      if(q > 1) {q <- 1}
       pNeg <- (1-q)*pNeg + q*vNeg
       
     }
   }
   print(numLoops)
-  return(list(w=w, bisect=pNeg+w/2, pPos=pPos, pNeg=pNeg))
+  return(list(w=w, bisect=.5*(w%.%pPos + w%.%pNeg), pPos=pPos, pNeg=pNeg))
 }
 
 normalize <- function(x) {
   return ((x - min(x)) / (max(x) - min(x)))
 }
+
+#Old b: pNeg+w/2

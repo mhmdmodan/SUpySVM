@@ -24,7 +24,7 @@ names(wine) <- c('type',
 smWine <- wine %>% select(type,alcohol,flav,mg) %>% mutate(type = ifelse(type != 1,-1,1))
 smWinePlot <- smWine
 smWinePlot$type <- as.factor(smWinePlot$type)
-ggpairs(smWinePlot,columns=2:ncol(smWinePlot),mapping=ggplot2::aes(colour = type))
+#ggpairs(smWinePlot,columns=2:ncol(smWinePlot),mapping=ggplot2::aes(colour = type))
 
 smWine[2:4] <- as.tibble(lapply(smWine[2:4], normalize))
 
@@ -42,7 +42,7 @@ mu <- findMu(weights[posClass], weights[negClass])
 out <- WSVM(ptsList, weights, yList, mu, 10^-5 ,10^-5)
 
 pred <- sapply(ptsList, function(pt) {
-  ifelse((pt-out$bisect) %.% out$w > 0, 1, -1)
+  ifelse(out$w %.% pt - out$b > 0, 1, -1)
   })
 
 confusionMatrix(pred, yList)
