@@ -128,6 +128,7 @@ WSVM <- function(P, s, y, rchFactor, ep, nonSep) {
       q <- ((pPos - pNeg) %.% (pPos - vPos))/dot(pPos - vPos,pPos - vPos)
       if(q < 0) {q <- 0}
       if(q > 1) {q <- 1}
+      print(q)
       pPos <- (1-q)*pPos + q*vPos
       
     } else {
@@ -135,6 +136,7 @@ WSVM <- function(P, s, y, rchFactor, ep, nonSep) {
       q <- -((pPos - pNeg) %.% (pNeg - vNeg))/dot(pNeg - vNeg,pNeg - vNeg)
       if(q < 0) {q <- 0}
       if(q > 1) {q <- 1}
+      print(q)
       pNeg <- (1-q)*pNeg + q*vNeg
       
     }
