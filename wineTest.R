@@ -39,7 +39,7 @@ weights <- sapply(ptsList, function(n) {1})
 
 mu <- findMu(weights[posClass], weights[negClass])
 
-out <- WSVM(ptsList, weights, yList, mu, 10^-5 ,10^-5)
+out <- WSVM(ptsList, weights, yList, mu, 10^-3 ,10^-5)
 
 pred <- sapply(ptsList, function(pt) {
   ifelse(out$w %.% pt - out$b > 0, 1, -1)
