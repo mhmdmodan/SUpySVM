@@ -176,7 +176,8 @@ WSVM <- function(P, s, y, rchFactor, ep, nonSep) {
       }
       
       q <- clamp(numerator/denominator, 0, 1)
-      
+      print(((pPosPt - pNegPt) %.% (pPosPt - vPosPt))/dot(pPosPt - vPosPt,pPosPt - vPosPt))
+      print(q)
       #pPosPt <- (1-q)*pPosPt + q*vPosPt
       
       for(i in 1:length(pPosWt)) {
@@ -219,7 +220,8 @@ WSVM <- function(P, s, y, rchFactor, ep, nonSep) {
       }
       
       q <- clamp(-numerator/denominator, 0, 1)
-      
+      print(-((pPosPt - pNegPt) %.% (pNegPt - vNegPt))/dot(pNegPt - vNegPt,pNegPt - vNegPt))
+      print(q)
       #pNegPt <- (1-q)*pNegPt + q*vNegPt
       
       for(i in 1:length(pNegWt)) {
