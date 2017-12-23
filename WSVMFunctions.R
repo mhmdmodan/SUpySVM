@@ -147,7 +147,37 @@ WSVM <- function(P, s, y, rchFactor, ep, nonSep) {
       
       #q <- ((pPosPt - pNegPt) %.% (pPosPt - vPosPt))/dot(pPosPt - vPosPt,pPosPt - vPosPt)
       
-      pPosPt <- (1-q)*pPosPt + q*vPosPt
+      #### New q calculation
+      
+      allWt <- c(pNegWt, pPosWt)
+      allPts <- c(neg, pos)
+      ptClass <- c(rep(-1, length(neg)), rep(1, length(pos)))
+      
+      numerator <- 0
+      for(i in 1:length(allPts)) {
+        jSum <- 0
+        for(j in 1:length(pos)) {
+          jSum <- jSum + allWt[i]*(pPosWt[j]-vPosWt[j])*ptClass[i]*dot(allPts[i], pos[j])
+        }
+        numerator <- numerator + jSum
+      }
+      
+      denominator <- 0
+      for(i in 1:length(pos)) {
+        jSum <- 0
+        for(i in 1:length(pos)) {
+          jSum <- jSum + (pPosWt[i] - vPosWt[i])*(pPosWt[j] - vPosWt[j])*dot(pos[i], pos[j])
+        }
+        denominator <- denominator + jSum
+      }
+      
+      q <- clamp(numerator/denominator, 0, 1)
+      
+      #pPosPt <- (1-q)*pPosPt + q*vPosPt
+      
+      for(i in 1:length(pPosWt)) {
+        pPosWt[i] <- (1-q)*pPosWt[i] + q*vPosWt[i]
+      }
       
     } else {
       
