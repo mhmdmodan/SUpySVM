@@ -179,6 +179,11 @@ WSVM <- function(P, s, y, rchFactor, ep, nonSep) {
         pPosWt[i] <- (1-q)*pPosWt[i] + q*vPosWt[i]
       }
       
+      pPosPt <- 0
+      for(i in 1:length(pPosWt)) {
+        pPosPt <- pPosPt + pPosWt[i]*pos[i]
+      }
+      
     } else {
       
       q <- -((pPosPt - pNegPt) %.% (pNegPt - vNegPt))/dot(pNegPt - vNegPt,pNegPt - vNegPt)
