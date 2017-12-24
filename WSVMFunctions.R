@@ -157,27 +157,25 @@ WSVM <- function(P, s, y, rchFactor, ep, nonSep) {
       allPts <- c(neg, pos)
       ptClass <- c(rep(-1, length(neg)), rep(1, length(pos)))
       
-      numerator <- 0
-      for(i in 1:length(allPts)) {
-        jSum <- 0
-        for(j in 1:length(pos)) {
-          jSum <- jSum + allWt[i]*(pPosWt[j]-vPosWt[j])*ptClass[i]*dot(allPts[[i]], pos[[j]])
-        }
-        numerator <- numerator + jSum
+      left <- vector(mode='numeric', length=length(allPts[[1]]))
+      for(i in 1:length(allWt)) {
+        left <- left + allWt[i]*ptClass[i]*allPts[[i]]
       }
+      right <- vector(mode='numeric',length=length(pos[[1]]))
+      for(i in 1:length(pPosWt)) {
+        right <- right + (pPosWt[i]-vPosWt[i])*pos[[i]]
+      }
+      numerator <- dot(left,right)
       
-      denominator <- 0
-      for(i in 1:length(pos)) {
-        jSum <- 0
-        for(i in 1:length(pos)) {
-          jSum <- jSum + (pPosWt[i] - vPosWt[i])*(pPosWt[j] - vPosWt[j])*dot(pos[[i]], pos[[j]])
-        }
-        denominator <- denominator + jSum
+      denominator <- vector(mode='numeric', length = length(pos[[1]]))
+      for(i in 1:length(pPosWt)) {
+        denominator <- denominator + (pPosWt[i]-vPosWt[i])*pos[[i]]
       }
+      denominator <- dot(denominator, denominator)
       
       q <- clamp(numerator/denominator, 0, 1)
       print(((pPosPt - pNegPt) %.% (pPosPt - vPosPt))/dot(pPosPt - vPosPt,pPosPt - vPosPt))
-      print(q)
+      print(numerator/denominator)
       #pPosPt <- (1-q)*pPosPt + q*vPosPt
       
       for(i in 1:length(pPosWt)) {
@@ -201,27 +199,25 @@ WSVM <- function(P, s, y, rchFactor, ep, nonSep) {
       allPts <- c(neg, pos)
       ptClass <- c(rep(-1, length(neg)), rep(1, length(pos)))
       
-      numerator <- 0
-      for(i in 1:length(allPts)) {
-        jSum <- 0
-        for(j in 1:length(neg)) {
-          jSum <- jSum + allWt[i]*(pNegWt[j]-vNegWt[j])*ptClass[i]*dot(allPts[[i]], neg[[j]])
-        }
-        numerator <- numerator + jSum
+      left <- vector(mode='numeric', length=length(allPts[[1]]))
+      for(i in 1:length(allWt)) {
+        left <- left + allWt[i]*ptClass[i]*allPts[[i]]
       }
+      right <- vector(mode='numeric',length=length(neg[[1]]))
+      for(i in 1:length(pNegWt)) {
+        right <- right + (pNegWt[i]-vNegWt[i])*neg[[i]]
+      }
+      numerator <- dot(left,right)
       
-      denominator <- 0
-      for(i in 1:length(neg)) {
-        jSum <- 0
-        for(i in 1:length(neg)) {
-          jSum <- jSum + (pNegWt[i] - vNegWt[i])*(pNegWt[j] - vNegWt[j])*dot(neg[[i]], neg[[j]])
-        }
-        denominator <- denominator + jSum
+      denominator <- vector(mode='numeric', length = length(neg[[1]]))
+      for(i in 1:length(pNegWt)) {
+        denominator <- denominator + (pNegWt[i]-vNegWt[i])*neg[[i]]
       }
+      denominator <- dot(denominator, denominator)
       
       q <- clamp(-numerator/denominator, 0, 1)
       print(-((pPosPt - pNegPt) %.% (pNegPt - vNegPt))/dot(pNegPt - vNegPt,pNegPt - vNegPt))
-      print(q)
+      print(-numerator/denominator)
       #pNegPt <- (1-q)*pNegPt + q*vNegPt
       
       for(i in 1:length(pNegWt)) {
