@@ -144,7 +144,7 @@ findMu <- function(weights1,weights2) {
 genRand <- function() {c(runif(1,-1,1),runif(1,-1,1))}
 
 #kernel
-kern <- function(x, y) {return(exp(-0.01*dot(x-y,x-y)))}
+kern <- function(x, y) {return(exp(0.01*dot(x-y,x-y)))}
 
 #WSVM Algorithm
 WSVM <- function(P, s, y, rchFactor, ep, nonSep) {
