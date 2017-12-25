@@ -79,6 +79,50 @@ WRCH <- function(P, s, u, increment) {
   return(CH)
 }
 
+getMaxIndex2 <- function(whichClass, P, a, allPts, ptsClass, ptsWts) {
+  maxInd <- -1
+  for(i in 1:length(P)) {
+    if(a[i] == 0) {
+      maxInd <- i
+      break
+    }
+  }
+  if(maxInd == -1) {
+    stop('None are 0')
+  }
+  for(i in 1:length(P)) {
+    if(a[i] == 0) {
+      curVal <- 0
+      maxVal <- 0
+      for(j in 1:length(allPts)) {
+        curVal <- curVal + whichClass*ptsWts[j]*ptsClass[j]*kern(allPts[[j]],P[[i]])
+        maxVal <- maxVal + whichClass*ptsWts[j]*ptsClass[j]*kern(allPts[[j]],P[[maxInd]])
+      }
+      maxInd <- ifelse(curVal %>=% maxVal, i, maxInd)
+    }
+  }
+  return(maxInd)
+}
+
+findVertex2 <- function(P, s, whichClass, u, allPts, ptsClass, ptsWts) {
+  if(length(P) != length(s)) {stop('P and s are not same length')}
+  
+  a <- vector(mode = 'numeric', length = length(P))
+  total <- 0
+  while(total %!=% 1) {
+    i <- getMaxIndex2(whichClass, P, a, allPts, ptsClass, ptsWts)
+    a[i] <- min(s[i]*u, 1-total)
+    total <- total + a[i]
+  }
+  
+  vSum <- 0
+  for(i in 1:length(P)) {
+    vSum <- vSum + a[i]*P[[i]]
+  }
+  
+  return(list(pt = vSum, wt = a))
+}
+
 #Get center of points
 getCenter <- function(P, s) {
   totalWeights <- sum(s)
@@ -100,7 +144,7 @@ findMu <- function(weights1,weights2) {
 genRand <- function() {c(runif(1,-1,1),runif(1,-1,1))}
 
 #kernel
-kern <- function(x, y) {return(dot(x,y))}
+kern <- function(x, y) {return(exp(-0.01*dot(x-y,x-y)))}
 
 #WSVM Algorithm
 WSVM <- function(P, s, y, rchFactor, ep, nonSep) {
@@ -129,9 +173,10 @@ WSVM <- function(P, s, y, rchFactor, ep, nonSep) {
   while(TRUE) {
     numLoops <- numLoops + 1
     w <- pPosPt - pNegPt
+    ptsClass <- c(rep(-1, length(neg)), rep(1, length(pos)))
     
-    vPos <- findVertex(pos, sPos, -w, rchFactor)
-    vNeg <- findVertex(neg, sNeg, w, rchFactor)
+    vPos <- findVertex2(pos, sPos, -1, rchFactor, c(neg,pos), ptsClass, c(pNegWt,pPosWt))
+    vNeg <- findVertex2(neg, sNeg, 1, rchFactor, c(neg,pos), ptsClass, c(pNegWt,pPosWt))
     
     vPosPt <- vPos$pt
     vNegPt <- vNeg$pt
@@ -146,7 +191,7 @@ WSVM <- function(P, s, y, rchFactor, ep, nonSep) {
       break
     }
     if(numLoops > 150) {break}
-    # print(w)
+    print(numLoops)
     # print(pPosPt)
     # print(pNegPt)
     if(w %.% (pPosPt - vPosPt) > w %.% (vNegPt - pNegPt)) {
@@ -176,10 +221,10 @@ WSVM <- function(P, s, y, rchFactor, ep, nonSep) {
         }
         denominator <- denominator + jSum
       }
-      
+      #print(numerator/denominator)
       q <- clamp(numerator/denominator, 0, 1)
       # print(((pPosPt - pNegPt) %.% (pPosPt - vPosPt))/dot(pPosPt - vPosPt,pPosPt - vPosPt))
-      # print(numerator/denominator)
+      
       #pPosPt <- (1-q)*pPosPt + q*vPosPt
       
       for(i in 1:length(pPosWt)) {
@@ -220,10 +265,9 @@ WSVM <- function(P, s, y, rchFactor, ep, nonSep) {
         }
         denominator <- denominator + jSum
       }
-      
+      #print(-numerator/denominator)
       q <- clamp(-numerator/denominator, 0, 1)
       # print(-((pPosPt - pNegPt) %.% (pNegPt - vNegPt))/dot(pNegPt - vNegPt,pNegPt - vNegPt))
-      # print(-numerator/denominator)
       #pNegPt <- (1-q)*pNegPt + q*vNegPt
       
       for(i in 1:length(pNegWt)) {
