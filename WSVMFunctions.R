@@ -38,7 +38,7 @@ getMaxIndex <- function(n, P, a) {
     if(a[i] == 0) {
       curVal <- dot(n, P[[i]])
       maxVal <- dot(n, P[[maxInd]])
-      maxInd <- ifelse(curVal > maxVal, i, maxInd)
+      maxInd <- ifelse(curVal %>=% maxVal, i, maxInd)
     }
   }
   return(maxInd)
@@ -100,7 +100,7 @@ findMu <- function(weights1,weights2) {
 genRand <- function() {c(runif(1,-1,1),runif(1,-1,1))}
 
 #kernel
-kern <- function(x, y) {return(exp(-0.01*dot(x-y,x-y)))}
+kern <- function(x, y) {return(dot(x,y))}
 
 #WSVM Algorithm
 WSVM <- function(P, s, y, rchFactor, ep, nonSep) {
