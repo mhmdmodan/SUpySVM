@@ -187,9 +187,9 @@ WSVM <- function(P, s, y, rchFactor, ep, nonSep) {
       stop('Hulls are overlapping!')
     }
     
-    if((1 - dot(w, (pPosPt - vNegPt))/dot(w,w)) < ep & (1 - dot(w, (vPosPt - pNegPt))/dot(w,w)) < ep) {
-      break
-    }
+    # if((1 - dot(w, (pPosPt - vNegPt))/dot(w,w)) < ep & (1 - dot(w, (vPosPt - pNegPt))/dot(w,w)) < ep) {
+    #   break
+    # }
     if(numLoops > 150) {break}
     print(numLoops)
     # print(pPosPt)
@@ -282,7 +282,8 @@ WSVM <- function(P, s, y, rchFactor, ep, nonSep) {
     }
   }
   print(numLoops)
-  return(list(w=w, bisect=.5*(w%.%pPosPt + w%.%pNegPt), pts = c(neg, pos), wts=c(pNegWt,pPosWt), ptClass = c(rep(-1, length(neg)), rep(1, length(pos)))))
+  return(list(w=w, bisect=.5*(w%.%pPosPt + w%.%pNegPt), pts = c(neg, pos), wts=c(pNegWt,pPosWt), ptClass = c(rep(-1, length(neg)), rep(1, length(pos))), 
+              pos=pos,neg=neg, pPosWt = pPosWt, pNegWt = pNegWt))
 }
 
 normalize <- function(x) {
