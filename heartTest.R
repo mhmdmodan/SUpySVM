@@ -10,7 +10,7 @@ heart <- heart %>% mutate(disease = ifelse(disease != 1,-1,1))
 
 heartPlot <- heart
 heartPlot$disease <- as.factor(heart$disease)
-ggpairs(heartPlot,columns=1:(ncol(heart)-1),mapping=ggplot2::aes(colour = disease))
+#ggpairs(heartPlot,columns=1:(ncol(heart)-1),mapping=ggplot2::aes(colour = disease))
 
 heart[1:10] <- as.tibble(lapply(heart[1:10], normalize))
 
@@ -36,8 +36,15 @@ mu <- findMu(weights[posClass], weights[negClass])
 
 out <- WSVM(ptsList, weights, yList, mu, 10^-2 ,10^-5)
 
+wts <- out$wts
+pts <- out$pts
+ptClass <- out$ptClass
 pred <- sapply(ptsList, function(pt) {
-  ifelse((pt-out$bisect) %.% out$w > 0, 1, -1)
+  wVal <- 0
+  for(i in 1:length(pts)) {
+    wVal <- wVal + wts[i]*ptClass[i]*kern(pts[[i]], pt)
+  }
+  return(ifelse(wVal - out$bisect > 0, 1, -1))
 })
 
 confusionMatrix(pred, yList)
