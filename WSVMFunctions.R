@@ -99,6 +99,9 @@ findMu <- function(weights1,weights2) {
 
 genRand <- function() {c(runif(1,-1,1),runif(1,-1,1))}
 
+#kernel
+kern <- function(x, y) {return((dot(x,y)+1)^6)}
+
 #WSVM Algorithm
 WSVM <- function(P, s, y, rchFactor, ep, nonSep) {
   
@@ -142,11 +145,10 @@ WSVM <- function(P, s, y, rchFactor, ep, nonSep) {
     if((1 - dot(w, (pPosPt - vNegPt))/dot(w,w)) < ep & (1 - dot(w, (vPosPt - pNegPt))/dot(w,w)) < ep) {
       break
     }
-    
-    print(w)
-    print(pPosPt)
-    print(pNegPt)
-    
+    if(numLoops > 150) {break}
+    # print(w)
+    # print(pPosPt)
+    # print(pNegPt)
     if(w %.% (pPosPt - vPosPt) > w %.% (vNegPt - pNegPt)) {
       
       #q <- ((pPosPt - pNegPt) %.% (pPosPt - vPosPt))/dot(pPosPt - vPosPt,pPosPt - vPosPt)
@@ -161,7 +163,7 @@ WSVM <- function(P, s, y, rchFactor, ep, nonSep) {
       for(i in 1:length(allPts)) {
         jSum <- 0
         for(j in 1:length(pos)) {
-          jSum <- jSum + allWt[i]*(pPosWt[j]-vPosWt[j])*ptClass[i]*dot(allPts[[i]], pos[[j]])
+          jSum <- jSum + allWt[i]*(pPosWt[j]-vPosWt[j])*ptClass[i]*kern(allPts[[i]], pos[[j]])
         }
         numerator <- numerator + jSum
       }
@@ -169,15 +171,15 @@ WSVM <- function(P, s, y, rchFactor, ep, nonSep) {
       denominator <- 0
       for(i in 1:length(pos)) {
         jSum <- 0
-        for(i in 1:length(pos)) {
-          jSum <- jSum + (pPosWt[i] - vPosWt[i])*(pPosWt[j] - vPosWt[j])*dot(pos[[i]], pos[[j]])
+        for(j in 1:length(pos)) {
+          jSum <- jSum + (pPosWt[i] - vPosWt[i])*(pPosWt[j] - vPosWt[j])*kern(pos[[i]], pos[[j]])
         }
         denominator <- denominator + jSum
       }
       
       q <- clamp(numerator/denominator, 0, 1)
-      print(((pPosPt - pNegPt) %.% (pPosPt - vPosPt))/dot(pPosPt - vPosPt,pPosPt - vPosPt))
-      print(q)
+      # print(((pPosPt - pNegPt) %.% (pPosPt - vPosPt))/dot(pPosPt - vPosPt,pPosPt - vPosPt))
+      # print(numerator/denominator)
       #pPosPt <- (1-q)*pPosPt + q*vPosPt
       
       for(i in 1:length(pPosWt)) {
@@ -189,7 +191,7 @@ WSVM <- function(P, s, y, rchFactor, ep, nonSep) {
         pPosPt <- pPosPt + pPosWt[i]*pos[[i]]
       }
       
-      print('pos')
+      # print('pos')
     } else {
       
       #q <- -((pPosPt - pNegPt) %.% (pNegPt - vNegPt))/dot(pNegPt - vNegPt,pNegPt - vNegPt)
@@ -205,7 +207,7 @@ WSVM <- function(P, s, y, rchFactor, ep, nonSep) {
       for(i in 1:length(allPts)) {
         jSum <- 0
         for(j in 1:length(neg)) {
-          jSum <- jSum + allWt[i]*(pNegWt[j]-vNegWt[j])*ptClass[i]*dot(allPts[[i]], neg[[j]])
+          jSum <- jSum + allWt[i]*(pNegWt[j]-vNegWt[j])*ptClass[i]*kern(allPts[[i]], neg[[j]])
         }
         numerator <- numerator + jSum
       }
@@ -213,15 +215,15 @@ WSVM <- function(P, s, y, rchFactor, ep, nonSep) {
       denominator <- 0
       for(i in 1:length(neg)) {
         jSum <- 0
-        for(i in 1:length(neg)) {
-          jSum <- jSum + (pNegWt[i] - vNegWt[i])*(pNegWt[j] - vNegWt[j])*dot(neg[[i]], neg[[j]])
+        for(j in 1:length(neg)) {
+          jSum <- jSum + (pNegWt[i] - vNegWt[i])*(pNegWt[j] - vNegWt[j])*kern(neg[[i]], neg[[j]])
         }
         denominator <- denominator + jSum
       }
       
       q <- clamp(-numerator/denominator, 0, 1)
-      print(-((pPosPt - pNegPt) %.% (pNegPt - vNegPt))/dot(pNegPt - vNegPt,pNegPt - vNegPt))
-      print(q)
+      # print(-((pPosPt - pNegPt) %.% (pNegPt - vNegPt))/dot(pNegPt - vNegPt,pNegPt - vNegPt))
+      # print(-numerator/denominator)
       #pNegPt <- (1-q)*pNegPt + q*vNegPt
       
       for(i in 1:length(pNegWt)) {
@@ -232,11 +234,11 @@ WSVM <- function(P, s, y, rchFactor, ep, nonSep) {
       for(i in 1:length(pNegWt)) {
         pNegPt <- pNegPt + pNegWt[i]*neg[[i]]
       }
-      print('neg')
+      # print('neg')
     }
   }
   print(numLoops)
-  return(list(w=w, bisect=.5*(w%.%pPosPt + w%.%pNegPt), pPos=pPosPt, pNeg=pNegPt))
+  return(list(w=w, bisect=.5*(w%.%pPosPt + w%.%pNegPt), pts = c(neg, pos), wts=c(pNegWt,pPosWt), ptClass = c(rep(-1, length(neg)), rep(1, length(pos)))))
 }
 
 normalize <- function(x) {
