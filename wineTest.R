@@ -41,6 +41,15 @@ mu <- findMu(weights[posClass], weights[negClass])
 
 out <- WSVM(ptsList, weights, yList, mu, 10^-5 ,10^-5)
 
+
+#####Test new B
+
+left <- dSumm(func=function(i,j){out$wts[i]*out$ptClass[i]*out$pPosWt[j]*kern(out$pts[[i]],out$pos[[j]])},
+              iEnd = length(out$pts), jEnd = length(out$pos))
+right <- dSumm(func=function(i,j){out$wts[i]*out$ptClass[i]*out$pNegWt[j]*kern(out$pts[[i]],out$neg[[j]])},
+               iEnd = length(out$pts), jEnd = length(out$neg))
+bisect <- .5*(left+right)
+
 wts <- out$wts
 pts <- out$pts
 ptClass <- out$ptClass
@@ -49,7 +58,7 @@ pred <- sapply(ptsList, function(pt) {
   for(i in 1:length(pts)) {
     wVal <- wVal + wts[i]*ptClass[i]*kern(pts[[i]], pt)
   }
-  return(ifelse(wVal - out$bisect > 0, 1, -1))
+  return(ifelse(wVal - bisect > 0, 1, -1))
 })
 
 confusionMatrix(pred, yList)

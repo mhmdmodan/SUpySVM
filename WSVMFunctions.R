@@ -4,6 +4,26 @@ library(fpCompare)
 dot <- function(x,y) {return((x %*% y)[[1]])}
 `%.%` <- function(x,y) {return((x %*% y)[[1]])}
 
+summ <- function(func, end=10, ...) {
+  initial <- func(1, ...)
+  for(i in 2:end) {
+    initial <- initial + func(i, ...)
+  }
+  return(initial)
+}
+
+dSumm <- function(func, iEnd = 10, jEnd = 10, ...) {
+  iSum <- func(1,1, ...)*0
+  for(i in 1:iEnd) {
+    jSum <- func(1, 1, ...)*0
+    for(j in 1:jEnd) {
+      jSum <- jSum + func(i, j, ...)
+    }
+    iSum <- iSum + jSum
+  }
+  return(iSum)
+}
+
 clamp <- function(expr, minim, maxim) {
   if(expr < minim) {
     return(minim)
@@ -144,7 +164,7 @@ findMu <- function(weights1,weights2) {
 genRand <- function() {c(runif(1,-1,1),runif(1,-1,1))}
 
 #kernel
-kern <- function(x, y) {return(exp(0.01*dot(x-y,x-y)))}
+kern <- function(x, y) {return(-.01*dot(x-y,x-y))}
 
 #WSVM Algorithm
 WSVM <- function(P, s, y, rchFactor, ep, nonSep) {
@@ -190,7 +210,7 @@ WSVM <- function(P, s, y, rchFactor, ep, nonSep) {
     # if((1 - dot(w, (pPosPt - vNegPt))/dot(w,w)) < ep & (1 - dot(w, (vPosPt - pNegPt))/dot(w,w)) < ep) {
     #   break
     # }
-    if(numLoops > 150) {break}
+    if(numLoops > 45) {break}
     print(numLoops)
     # print(pPosPt)
     # print(pNegPt)
