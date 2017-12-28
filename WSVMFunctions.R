@@ -164,7 +164,7 @@ findMu <- function(weights1,weights2) {
 genRand <- function() {c(runif(1,-1,1),runif(1,-1,1))}
 
 #kernel
-kern <- function(x, y) {return(-.01*dot(x-y,x-y))}
+kern <- function(x, y) {return(dot(x,y)^6)}
 
 #WSVM Algorithm
 WSVM <- function(P, s, y, rchFactor, ep, nonSep) {
@@ -203,14 +203,14 @@ WSVM <- function(P, s, y, rchFactor, ep, nonSep) {
     vPosWt <- vPos$wt
     vNegWt <- vNeg$wt
     
-    if(sqrt(dot(w,w)) < nonSep) {
-      stop('Hulls are overlapping!')
-    }
+    # if(sqrt(dot(w,w)) < nonSep) {
+    #   stop('Hulls are overlapping!')
+    # }
     
     # if((1 - dot(w, (pPosPt - vNegPt))/dot(w,w)) < ep & (1 - dot(w, (vPosPt - pNegPt))/dot(w,w)) < ep) {
     #   break
     # }
-    if(numLoops > 45) {break}
+    if(numLoops > 3) {break}
     print(numLoops)
     # print(pPosPt)
     # print(pNegPt)
