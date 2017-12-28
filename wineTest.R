@@ -44,15 +44,11 @@ out <- WSVM(ptsList, weights, yList, mu, 10^-5 ,10^-5)
 
 #####Test new B
 
-left <- dSumm(func=function(i,j){out$wts[i]*out$ptClass[i]*out$pPosWt[j]*kern(out$pts[[i]],out$pos[[j]])},
-              iEnd = length(out$pts), jEnd = length(out$pos))
-right <- dSumm(func=function(i,j){out$wts[i]*out$ptClass[i]*out$pNegWt[j]*kern(out$pts[[i]],out$neg[[j]])},
-               iEnd = length(out$pts), jEnd = length(out$neg))
-bisect <- .5*(left+right)
-
+bisect <- out$bisect
 wts <- out$wts
 pts <- out$pts
-ptClass <- out$ptClass
+ptClass <- out$ptsClass
+
 pred <- sapply(ptsList, function(pt) {
   wVal <- 0
   for(i in 1:length(pts)) {
