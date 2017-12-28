@@ -123,7 +123,7 @@ WSVM <- function(P, s, y, rchFactor, ep, nonSep) {
       break
     }
     
-    if(w %.% (pPos - vPos) > w %.% (vNeg - pNeg)) {
+    if(w %.% (pPos - vNeg) > w %.% (vPos - pNeg)) {
       
       q <- ((pPos - pNeg) %.% (pPos - vPos))/dot(pPos - vPos,pPos - vPos)
       if(q < 0) {q <- 0}
