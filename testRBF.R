@@ -66,3 +66,25 @@ pred <- sapply(ptsList, function(pt) {
 })
 
 confusionMatrix(pred, yList)
+
+dtInit <- as.data.frame(list(x=1,y=1,w=1))
+xVal <- -0.5
+while(xVal %<=% 0.50) {
+  yVal <- -0.5
+  while(yVal %<=% 0.50) {
+    wVal <- 0
+    for(i in 1:length(pts)) {
+      wVal <- wVal + wts[i]*ptClass[i]*kern(pts[[i]], c(xVal,yVal))
+    }
+    dtInit <- rbind(dtInit, as.data.frame(list(x=xVal, y=yVal, w=ifelse(wVal - bisect > 0, 1, -1))))
+    
+    yVal <- yVal + 0.02
+  }
+  xVal <- xVal + 0.02
+}
+
+ggplot(dtInit[-1,],aes(x=x,y=y))+
+  geom_raster(aes(fill=w),interpolate = FALSE)+
+  scale_fill_gradient(low='salmon',high='dodgerblue') + 
+  geom_point(data=poop,aes(x=x,y=y,color = class))+labs(fill='w-b')+
+  scale_color_gradient(high = 'blue', low='red')
