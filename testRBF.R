@@ -58,10 +58,8 @@ wts <- out$wts
 pts <- out$pts
 ptClass <- out$ptsClass
 pred <- sapply(ptsList, function(pt) {
-    wVal <- 0
-    for (i in 1:length(pts)) {
-        wVal <- wVal + wts[i] * ptClass[i] * kern(pts[[i]], pt)
-    }
+
+    wVal <- summ(function(i) { wts[i] * ptClass[i] * kern(pts[[i]], pt) }, end = length(wts))
     return(ifelse(wVal - bisect > 0, 1, -1))
 })
 

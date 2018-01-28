@@ -77,10 +77,7 @@ findVertex <- function(P, s, n, u) {
         total <- total + a[i]
     }
 
-    vSum <- 0
-    for (i in 1:length(P)) {
-        vSum <- vSum + a[i] * P[[i]]
-    }
+    vSum <- summ(function(i) { a[i] * P[[i]] }, length(P))
 
     return(list(pt = vSum, wt = a))
 }
@@ -135,10 +132,7 @@ findVertex2 <- function(P, s, whichClass, u, allPts, ptsClass, ptsWts) {
         total <- total + a[i]
     }
 
-    vSum <- 0
-    for (i in 1:length(P)) {
-        vSum <- vSum + a[i] * P[[i]]
-    }
+    vSum <- summ(function(i) { a[i] * P[[i]] }, length(P))
 
     return(list(pt = vSum, wt = a))
 }
@@ -148,10 +142,7 @@ getCenter <- function(P, s) {
     totalWeights <- sum(s)
     newS <- sapply(s, function(x) { x / totalWeights })
 
-    cumMean <- vector(mode = 'numeric', length = length(P[[1]]))
-    for (i in 1:length(P)) {
-        cumMean <- cumMean + P[[i]] * newS[i]
-    }
+    cumMean <- summ(function(i) { P[[i]] * newS[i] }, length(P[[1]]))
 
     return(cumMean)
 }
