@@ -252,13 +252,21 @@ WSVM <- function(P, s, y, rchFactor, ep, nonSep) {
     print(numLoops)
 
     bisect <- .5 * dSumm(
-    function(i, j) {
-        allWt[i] * ptsClass[i] * allWt[j] * kern(allPts[[i]], allPts[[j]])
-    }, iEnd = length(allPts), jEnd = length(allPts)
-  )
+        function(i, j) {
+            allWt[i] * ptsClass[i] * allWt[j] * kern(allPts[[i]], allPts[[j]])
+        }, iEnd = length(allPts), jEnd = length(allPts)
+    )
+
+    predictor <- function(ptsList) {
+        prediction <- sapply(ptsList, function(pt) {
+            wVal <- summ(function(i) { wts[i] * ptsClass[i] * kern(allPts[[i]], pt) }, end = length(wts))
+            return(ifelse(wVal - bisect > 0, 1, -1))
+        })
+        return(prediction)
+    }
 
     return(list(bisect = bisect, pts = allPts, wts = c(pNegWt, pPosWt), ptsClass = ptsClass,
-              pos = pos, neg = neg, pPosWt = pPosWt, pNegWt = pNegWt))
+              pos = pos, neg = neg, pPosWt = pPosWt, pNegWt = pNegWt, predictor = predictor))
 }
 
 normalize <- function(x) {
