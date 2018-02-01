@@ -97,27 +97,14 @@ WRCH <- function(P, s, u, increment) {
 }
 
 getMaxIndex2 <- function(whichClass, P, a, allPts, ptsClass, ptsWts, fCache) {
-    maxInd <- -1
-    for (i in 1:length(P)) {
-        if (a[i] == 0) {
-            maxInd <- i
-            break
-        }
+    if (whichClass == 1) {
+        fCache <- whichClass * fCache[which(ptsClass < 0)]
+    } else {
+        fCache <- whichClass * fCache[which(ptsClass > 0)]
     }
-    if (maxInd == -1) {
-        stop('None are 0')
-    }
-    for (i in 1:length(P)) {
-        if (a[i] == 0) {
-            curVal <- 0
-            maxVal <- 0
-            for (j in 1:length(allPts)) {
-                curVal <- curVal + whichClass * fCache[i]
-                maxVal <- maxVal + whichClass * fCache[maxInd]
-            }
-            maxInd <- ifelse(curVal %>=% maxVal, i, maxInd)
-        }
-    }
+
+    zeros <- which(a == 0)
+    maxInd <- which(fCache == max(fCache[zeros]))[1]
     return(maxInd)
 }
 
@@ -218,11 +205,7 @@ WSVM <- function(P, s, y, rchFactor, ep, nonSep) {
         numLoops <- numLoops + 1
         allWt <- c(pNegWt, pPosWt)
 
-        vPosWt <- findVertex2(pos, sPos, -1, rchFactor, c(neg, pos), ptsClass, c(pNegWt, pPosWt), fCache)$wt
-        vNegWt <- findVertex2(neg, sNeg, 1, rchFactor, c(neg, pos), ptsClass, c(pNegWt, pPosWt), fCache)$wt
-
-        allVWt <- c(vNegWt, vPosWt)
-
+        #Update cache
         for (i in 1:numPt) {
             curSum <- 0
             for (k in 1:numPt) {
@@ -233,6 +216,11 @@ WSVM <- function(P, s, y, rchFactor, ep, nonSep) {
 
         fNeg <- fCache[which(ptsClass < 0)]
         fPos <- fCache[which(ptsClass > 0)]
+
+        vPosWt <- findVertex2(pos, sPos, -1, rchFactor, c(neg, pos), ptsClass, c(pNegWt, pPosWt), fCache)$wt
+        vNegWt <- findVertex2(neg, sNeg, 1, rchFactor, c(neg, pos), ptsClass, c(pNegWt, pPosWt), fCache)$wt
+
+        allVWt <- c(vNegWt, vPosWt)
 
         # if(numLoops > 4) {break}
         #print(numLoops)
