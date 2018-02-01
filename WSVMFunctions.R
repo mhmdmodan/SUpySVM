@@ -225,21 +225,33 @@ WSVM <- function(P, s, y, rchFactor, ep, nonSep) {
         # if(numLoops > 4) {break}
         #print(numLoops)
 
-        w.vPos_pNeg <- dSumm(function(i, j) {
-            allWt[i] * ptsClass[i] * (
-            max(ptsClass[j], 0) * allVWt[j] + min(ptsClass[j], 0) * allWt[j]
-            ) * kern(allPts[[i]], allPts[[j]])
-        }, iEnd = length(allPts), jEnd = length(allPts))
+        #w.vPos_pNeg <- dSumm(function(i, j) {
+            #allWt[i] * ptsClass[i] * (
+            #max(ptsClass[j], 0) * allVWt[j] + min(ptsClass[j], 0) * allWt[j]
+            #) * kern(allPts[[i]], allPts[[j]])
+        #}, iEnd = length(allPts), jEnd = length(allPts))
 
-        w.pPos_vNeg <- dSumm(function(i, j) {
-            allWt[i] * ptsClass[i] * (
-            max(ptsClass[j], 0) * allWt[j] + min(ptsClass[j], 0) * allVWt[j]
-            ) * kern(allPts[[i]], allPts[[j]])
-        }, iEnd = length(allPts), jEnd = length(allPts))
+        w.vPos_pNeg <- summ(function(j) {
+            (max(ptsClass[j], 0) * allVWt[j] + min(ptsClass[j], 0) * allWt[j]) * fCache[j]
+        }, end = numPt)
 
-        w.w <- dSumm(function(i, j) {
-            allWt[i] * allWt[j] * ptsClass[i] * ptsClass[j] * kern(allPts[[i]], allPts[[j]])
-        }, iEnd = length(allPts), jEnd = length(allPts))
+        #w.pPos_vNeg <- dSumm(function(i, j) {
+            #allWt[i] * ptsClass[i] * (
+            #max(ptsClass[j], 0) * allWt[j] + min(ptsClass[j], 0) * allVWt[j]
+            #) * kern(allPts[[i]], allPts[[j]])
+        #}, iEnd = length(allPts), jEnd = length(allPts))
+
+        w.pPos_vNeg <- summ(function(j) {
+            (max(ptsClass[j], 0) * allWt[j] + min(ptsClass[j], 0) * allVWt[j]) * fCache[j]
+        }, end = numPt)
+
+        #w.w <- dSumm(function(i, j) {
+            #allWt[i] * allWt[j] * ptsClass[i] * ptsClass[j] * kern(allPts[[i]], allPts[[j]])
+        #}, iEnd = length(allPts), jEnd = length(allPts))
+
+        w.w <- summ(function(j) {
+            allWt[j]*ptsClass[j]*fCache[j]
+        }, end = numPt)
 
         if (w.pPos_vNeg > w.vPos_pNeg) {
 
