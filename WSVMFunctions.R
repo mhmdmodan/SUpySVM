@@ -96,7 +96,7 @@ WRCH <- function(P, s, u, increment) {
     return(CH)
 }
 
-getMaxIndex2 <- function(whichClass, P, a, allPts, ptsClass, ptsWts) {
+getMaxIndex2 <- function(whichClass, P, a, allPts, ptsClass, ptsWts, fCache) {
     maxInd <- -1
     for (i in 1:length(P)) {
         if (a[i] == 0) {
@@ -112,8 +112,8 @@ getMaxIndex2 <- function(whichClass, P, a, allPts, ptsClass, ptsWts) {
             curVal <- 0
             maxVal <- 0
             for (j in 1:length(allPts)) {
-                curVal <- curVal + whichClass * ptsWts[j] * ptsClass[j] * kern(allPts[[j]], P[[i]])
-                maxVal <- maxVal + whichClass * ptsWts[j] * ptsClass[j] * kern(allPts[[j]], P[[maxInd]])
+                curVal <- curVal + whichClass * fCache[i]
+                maxVal <- maxVal + whichClass * fCache[maxInd]
             }
             maxInd <- ifelse(curVal %>=% maxVal, i, maxInd)
         }
@@ -121,13 +121,13 @@ getMaxIndex2 <- function(whichClass, P, a, allPts, ptsClass, ptsWts) {
     return(maxInd)
 }
 
-findVertex2 <- function(P, s, whichClass, u, allPts, ptsClass, ptsWts) {
+findVertex2 <- function(P, s, whichClass, u, allPts, ptsClass, ptsWts, fCache) {
     if (length(P) != length(s)) { stop('P and s are not same length') }
 
     a <- vector(mode = 'numeric', length = length(P))
     total <- 0
     while (total %!=% 1) {
-        i <- getMaxIndex2(whichClass, P, a, allPts, ptsClass, ptsWts)
+        i <- getMaxIndex2(whichClass, P, a, allPts, ptsClass, ptsWts, fCache)
         a[i] <- min(s[i] * u, 1 - total)
         total <- total + a[i]
     }
@@ -218,8 +218,8 @@ WSVM <- function(P, s, y, rchFactor, ep, nonSep) {
         numLoops <- numLoops + 1
         allWt <- c(pNegWt, pPosWt)
 
-        vPosWt <- findVertex2(pos, sPos, -1, rchFactor, c(neg, pos), ptsClass, c(pNegWt, pPosWt))$wt
-        vNegWt <- findVertex2(neg, sNeg, 1, rchFactor, c(neg, pos), ptsClass, c(pNegWt, pPosWt))$wt
+        vPosWt <- findVertex2(pos, sPos, -1, rchFactor, c(neg, pos), ptsClass, c(pNegWt, pPosWt), fCache)$wt
+        vNegWt <- findVertex2(neg, sNeg, 1, rchFactor, c(neg, pos), ptsClass, c(pNegWt, pPosWt), fCache)$wt
 
         allVWt <- c(vNegWt, vPosWt)
 
