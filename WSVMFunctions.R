@@ -157,6 +157,25 @@ genRand <- function() { c(runif(1, -1, 1), runif(1, -1, 1)) }
 #kernel
 kern <- function(x, y) { return(dot(x, y) ^ 2) }
 
+#Cache updater
+fUpdate <- function(fCache, q, ptsClass, allPts, allVWt, type) {
+    if (type == -1) {
+        fCache <- fCache[which(ptsClass < 0)]
+        ptsClass <- ptsClass[which(ptsClass < 0)]
+    } else {
+        fCache <- fCache[which(ptsClass > 0)]
+        ptsClass <- ptsClass[which(ptsClass > 0)]
+    }
+    for (i in 1:length(fCache)) {
+        summation <- 0
+        for (k in 1:length(allPts)) {
+            summation <- summation + ptsClass[i] * allVWt[i] * kern(allPts[[k]], allPts[[i]])
+        }
+        fCache[i] <- (1 - q) * fCache[i] + q * summation
+    }
+    return(fCache)
+}
+
 #WSVM Algorithm
 WSVM <- function(P, s, y, rchFactor, ep, nonSep) {
 
@@ -166,6 +185,7 @@ WSVM <- function(P, s, y, rchFactor, ep, nonSep) {
     pos <- P[classPos]
     neg <- P[classNeg]
     allPts <- c(neg, pos)
+    numPt <- length(allPts)
 
     sPos <- s[classPos]
     sNeg <- s[classNeg]
@@ -175,10 +195,24 @@ WSVM <- function(P, s, y, rchFactor, ep, nonSep) {
 
     pPosWt <- findVertex(pos, sPos, centerNeg - centerPos, rchFactor)$wt
     pNegWt <- findVertex(neg, sNeg, centerPos - centerNeg, rchFactor)$wt
+    allWt <- c(pNegWt, pPosWt)
 
     ptsClass <- c(rep(-1, length(neg)), rep(1, length(pos)))
 
     numLoops <- 0
+
+    #Initialize f value cache
+    fCache <- rep(0, numPt)
+    for (i in 1:numPt) {
+        curSum <- 0
+        for (k in 1:numPt) {
+            curSum <- curSum + allWt[k] * ptsClass[k] * kern(allPts[[k]], allPts[[i]])
+        }
+        fCache[i] <- curSum
+    }
+
+    fNeg <- fCache[which(ptsClass < 0)]
+    fPos <- fCache[which(ptsClass > 0)]
 
     while (TRUE) {
         numLoops <- numLoops + 1
@@ -189,8 +223,19 @@ WSVM <- function(P, s, y, rchFactor, ep, nonSep) {
 
         allVWt <- c(vNegWt, vPosWt)
 
+        for (i in 1:numPt) {
+            curSum <- 0
+            for (k in 1:numPt) {
+                curSum <- curSum + allWt[k] * ptsClass[k] * kern(allPts[[k]], allPts[[i]])
+            }
+            fCache[i] <- curSum
+        }
+
+        fNeg <- fCache[which(ptsClass < 0)]
+        fPos <- fCache[which(ptsClass > 0)]
+
         # if(numLoops > 4) {break}
-        print(numLoops)
+        #print(numLoops)
 
         w.vPos_pNeg <- dSumm(function(i, j) {
             allWt[i] * ptsClass[i] * (
@@ -212,15 +257,21 @@ WSVM <- function(P, s, y, rchFactor, ep, nonSep) {
 
             if (1 - w.vPos_pNeg / w.w < ep) { break }
 
-            numerator <- dSumm(function(i, j) {
-                allWt[i] * (pPosWt[j] - vPosWt[j]) * ptsClass[i] * kern(allPts[[i]], pos[[j]])
-            }, iEnd = length(allPts), jEnd = length(pos))
+            #numerator <- dSumm(function(i, j) {
+            #allWt[i] * (pPosWt[j] - vPosWt[j]) * ptsClass[i] * kern(allPts[[i]], pos[[j]])
+            #}, iEnd = length(allPts), jEnd = length(pos))
+
+            numerator <- summ(function(i) {(pPosWt[i] - vPosWt[i]) * fPos[i] }, end = length(fPos))
 
             denominator <- dSumm(function(i, j) {
                 (pPosWt[i] - vPosWt[i]) * (pPosWt[j] - vPosWt[j]) * kern(pos[[i]], pos[[j]])
             }, iEnd = length(pos), jEnd = length(pos))
 
             q <- clamp(numerator / denominator, 0, 1)
+
+            #fCache[which(ptsClass > 0)] <- fUpdate(fCache, q, ptsClass, pos, vPosWt, 1)
+            #fNeg <- fCache[which(ptsClass < 0)]
+            #fPos <- fCache[which(ptsClass > 0)]
 
             for (i in 1:length(pPosWt)) {
                 pPosWt[i] <- (1 - q) * pPosWt[i] + q * vPosWt[i]
@@ -231,16 +282,21 @@ WSVM <- function(P, s, y, rchFactor, ep, nonSep) {
 
             if (1 - w.pPos_vNeg / w.w < ep) { break }
 
-            numerator <- dSumm(function(i, j) {
-                allWt[i] * (pNegWt[j] - vNegWt[j]) * ptsClass[i] * kern(allPts[[i]], neg[[j]])
-            }, iEnd = length(allPts), jEnd = length(neg))
+            #numerator <- dSumm(function(i, j) {
+                #allWt[i] * (pNegWt[j] - vNegWt[j]) * ptsClass[i] * kern(allPts[[i]], neg[[j]])
+            #}, iEnd = length(allPts), jEnd = length(neg))
 
+            numerator <- summ(function(i) {(pNegWt[i] - vNegWt[i]) * fNeg[i] }, end = length(fNeg))
 
             denominator <- dSumm(function(i, j) {
                 (pNegWt[i] - vNegWt[i]) * (pNegWt[j] - vNegWt[j]) * kern(neg[[i]], neg[[j]])
             }, iEnd = length(neg), jEnd = length(neg))
 
             q <- clamp(-numerator / denominator, 0, 1)
+
+            #fCache[which(ptsClass < 0)] <- fUpdate(fCache, q, ptsClass, neg, vNegWt, -1)
+            #fNeg <- fCache[which(ptsClass < 0)]
+            #fPos <- fCache[which(ptsClass > 0)]
 
             for (i in 1:length(pNegWt)) {
                 pNegWt[i] <- (1 - q) * pNegWt[i] + q * vNegWt[i]
